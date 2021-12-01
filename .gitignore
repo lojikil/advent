@@ -1,0 +1,6 @@
+*/_build/**
+*.cm*
+*.swp
+*.swo
+*.o
+.DS_Store
