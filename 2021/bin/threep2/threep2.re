@@ -9,14 +9,14 @@ let iter_channel = (s:in_channel) => {
 
 let oxygen_filter = (h:array(int), l:array(int), v:int, i:int) => {
     let binval = 2 lsl (Array.length(h) - 2)
-    switch((Array.get(h, i), Array.get(l, i)) {
+    switch((Array.get(h, i), Array.get(l, i))) {
         | (n, m) when n == m => {
             (v land binval) == binval
         }
-        | (x, y) when x > m => {
+        | (x, y) when x > y => {
             (v land binval) == binval
         }
-        | (z, a) when z < a => {
+        | _ => {
             (v land binval) == 0
         }
     }
@@ -44,11 +44,13 @@ let fh = open_in(Array.get(Sys.argv, 1))
 //let lbitcounts = [|0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0|]
 let hbitcounts = [|0, 0, 0, 0, 0|]
 let lbitcounts = [|0, 0, 0, 0, 0|]
+let values = ref([])
 
 Stream.iter((x) => {
     //let cur = ref(2048)
     let cur = ref(16)
     //for(idx in 0 to 11) { 
+    values := List.append([x], values^)
     for(idx in 0 to 4) {
         if ((x land cur^) == cur^) {
             Array.set(hbitcounts, idx, Array.get(hbitcounts, idx) + 1)
@@ -63,11 +65,5 @@ print_endline("high counts:")
 Array.iter((x) => {print_endline(string_of_int(x));}, hbitcounts)
 print_endline("low counts:")
 Array.iter((x) => {print_endline(string_of_int(x));}, lbitcounts)
-
-let gamma = compare_bits(hbitcounts, lbitcounts, true)
-let epsilon = compare_bits(hbitcounts, lbitcounts, false)
-
-print_endline("gamma: " ++ string_of_int(gamma));
-print_endline("epsilon: " ++ string_of_int(epsilon));
-
-print_endline("Power rate: " ++ string_of_int(gamma * epsilon))
+print_endline("Read values:")
+List.iter((x) => {print_endline(string_of_int(x)); }, values^)
