@@ -29,6 +29,7 @@ let oxygen_filter = (h:array(int), l:array(int), v:int, i:int) => {
 }
 
 let co2_filter = (h:array(int), l:array(int), v:int, i:int) => {
+    print_endline("here on 32")
     let lbinval = 2 lsl (Array.length(h) - 2 - i)
     let binval = if(lbinval == 0) { 1 } else { lbinval }
     print_endline("co2 filter, binval: " ++ string_of_int(binval))
@@ -36,7 +37,7 @@ let co2_filter = (h:array(int), l:array(int), v:int, i:int) => {
     switch((Array.get(h, i), Array.get(l, i))) {
         | (n, m) when n == m => {
             print_endline("here on 38");
-            (v land binval) == binval
+            (v land binval) == 0
         }
         | (x, y) when x < y => {
             print_endline("here on 42");
@@ -44,7 +45,7 @@ let co2_filter = (h:array(int), l:array(int), v:int, i:int) => {
         }
         | _ => {
             print_endline("here on 46");
-            (v land binval) == 1
+            (v land binval) == 0
         }
     }
 }
@@ -124,6 +125,7 @@ while(cont^) {
 }
 idx := 0
 clear_bits()
+cont := true
 List.iter(count_bits, values^)
 print_endline("oxygen value: " ++ string_of_int(List.nth(oxygen_values^, 0)))
 let oxygen = List.nth(oxygen_values^, 0)
