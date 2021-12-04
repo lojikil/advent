@@ -2,14 +2,34 @@
 
 Problems from 2021's Advent of Code, and some thoughts therein
 
+=== Building
+
+You'll need:
+
+- OCaml
+- ReasonML CLI (at least)
+
+and then building is as simple as `+dune b --root .+`
+
 == Problem One
 
 * I could have made this more functional; reading in the whole set and iterating there would have been easy enough
 * Same goes for the second part: I could have read in the entire set and then just iterated in threes over it
 * I may try this as well and see if I can get the correct parts with a more functional codebase 
+* `+dune exec bin/one/one.exe data/one/test1+`
+* `+dune exec bin/onep2/onep2.exe data/one/test1+`
 
 == Problem Two
 
 * Would have been interesting as a Module or the like that handled things
 * Obviously, a simple tail recursive function would have been easy too
 * but a Monad could be neat as well; it's just a Command monad, right?
+* `+dune exec bin/two/two.exe data/two/test1+`
+* `+dune exec bin/twop2/twop2.exe data/two/test1+`
+
+== Problem Three
+
+* **Really** dislike bit fiddling in OCaml
+* I also forgot to reset the value of `+cont+` in between my loops
+* `+dune exec bin/three/three.exe data/three/test1+`
+* `+dune exec bin/threep2/threep2.exe data/three/test1+`
