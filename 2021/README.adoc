@@ -39,3 +39,5 @@ and then building is as simple as `+dune b --root .+`
 * I ended up writing a lot of helper functions
 * I really think something like `Array.every` and the like should exist; I wrote my own
 * Basically, I ended up with some predicates that looped over the board, combined in predicates that looped over the state of all boards
+* `+dune exec bin/four/four.exe data/four/test1 | grep 'won on play' | head -1+`
+* `+dune exec bin/four/four.exe data/four/test1 | grep 'won on play' > d; python3 bin/four/fourp2.py+`
