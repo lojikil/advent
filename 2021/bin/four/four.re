@@ -137,17 +137,17 @@ let play = (playcount:int, bingo_number:string, b:array(array(array(string)))) =
                 }
             }
             if(horizontal_win_p(inner_board)) {
-                print_endline("board: " ++ string_of_int(idx) ++ " won on play: " ++ string_of_int(playcount) ++ " horizontally")
                 let final_play = int_of_string(bingo_number)
                 let score = calc_score(board)
+                print_string("board: " ++ string_of_int(idx) ++ " won on play: " ++ string_of_int(playcount) ++ " horizontally; ")
                 print_endline("final score is: " ++ string_of_int(final_play * score))
             } else {
                 ()
             }
             if(vertical_win_p(board, i)) {
-                print_endline("board: " ++ string_of_int(idx) ++ " won on play: " ++ string_of_int(playcount) ++ " vertically")
                 let final_play = int_of_string(bingo_number)
                 let score = calc_score(board)
+                print_string("board: " ++ string_of_int(idx) ++ " won on play: " ++ string_of_int(playcount) ++ " vertically; ")
                 print_endline("final score is: " ++ string_of_int(final_play * score))
             } else {
                 ()
