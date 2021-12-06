@@ -33,3 +33,9 @@ and then building is as simple as `+dune b --root .+`
 * I also forgot to reset the value of `+cont+` in between my loops
 * `+dune exec bin/three/three.exe data/three/test1+`
 * `+dune exec bin/threep2/threep2.exe data/three/test1+`
+
+== Problem Four
+
+* I ended up writing a lot of helper functions
+* I really think something like `Array.every` and the like should exist; I wrote my own
+* Basically, I ended up with some predicates that looped over the board, combined in predicates that looped over the state of all boards
