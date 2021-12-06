@@ -87,6 +87,22 @@ let show_board = (b:array(array(string)), _:int) => {
     }
 }
 
+
+let calc_score = (b:array(array(string))):int => {
+    let sum = ref(0)
+    for(i in 0 to Array.length(b) - 1) {
+        let inner_board = Array.get(b, i)
+        for(j in 0 to Array.length(inner_board) - 1) {
+            if(String.get(Array.get(inner_board, j), 0) != '+') {
+                sum := sum^ + int_of_string(Array.get(inner_board, j))
+            } else {
+                ()
+            }
+        }
+    }
+    sum^
+}
+
 // I really feel like I shouldn't have had to write this function...
 let array_every = (fn: ('a => bool), a:array('a)):bool => {
     let rec inner = (idx:int):bool => {
@@ -122,11 +138,17 @@ let play = (playcount:int, bingo_number:string, b:array(array(array(string)))) =
             }
             if(horizontal_win_p(inner_board)) {
                 print_endline("board: " ++ string_of_int(idx) ++ " won on play: " ++ string_of_int(playcount) ++ " horizontally")
+                let final_play = int_of_string(bingo_number)
+                let score = calc_score(board)
+                print_endline("final score is: " ++ string_of_int(final_play * score))
             } else {
                 ()
             }
             if(vertical_win_p(board, i)) {
                 print_endline("board: " ++ string_of_int(idx) ++ " won on play: " ++ string_of_int(playcount) ++ " vertically")
+                let final_play = int_of_string(bingo_number)
+                let score = calc_score(board)
+                print_endline("final score is: " ++ string_of_int(final_play * score))
             } else {
                 ()
             }
