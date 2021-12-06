@@ -44,7 +44,6 @@ let is_numeric = (c:char):bool => {
 }
 
 let rec take_white = (src:string, offset:int):int => {
-    print_endline("t/w: " ++ string_of_int(offset))
     switch(String.get(src, offset)) {
         | n when is_whitespace(n) => take_white(src, offset + 1)
         | _ => offset
@@ -52,19 +51,18 @@ let rec take_white = (src:string, offset:int):int => {
 }
 
 let take_number = (b:ref(array(array(string))), src:string, start:int):int => {
-    print_endline("t/n: " ++ string_of_int(start))
     let rec inner_numeric = (offset:int):int => {
-        print_endline("i/n: " ++ string_of_int(offset))
         switch(String.get(src, offset)) {
             | n when is_numeric(n) => inner_numeric(offset + 1)
             | _ => {
-                print_endline("i/n(fin): " ++ string_of_int(offset))
                 let num = String.sub(src, start, offset - start)
                 find_slot(b, num)
                 offset
             }
             | exception Invalid_argument(_) => {
-                start
+                let num = String.sub(src, start, offset - start)
+                find_slot(b, num)
+                offset
             }
         }
     }
@@ -76,7 +74,6 @@ let take_number = (b:ref(array(array(string))), src:string, start:int):int => {
 }
 
 let show_board = (b:array(array(string)), _:int) => {
-    print_endline("in show_board")
     for(i in 0 to Array.length(b) - 1) {
         let inner_board = Array.get(b, i)
         for(j in 0 to Array.length(inner_board) - 1) {
@@ -90,18 +87,68 @@ let show_board = (b:array(array(string)), _:int) => {
     }
 }
 
+// I really feel like I shouldn't have had to write this function...
+let array_every = (fn: ('a => bool), a:array('a)):bool => {
+    let rec inner = (idx:int):bool => {
+        if(idx >= Array.length(a)) {
+            true
+        } else if(fn(Array.get(a, idx))) {
+            inner(idx + 1)
+        } else {
+            false
+        }
+    }
+    inner(0)
+}
+
+let vertical_win_p = (board:array(array(string)), col:int):bool => {
+    array_every((x) => { Char.compare(String.get(Array.get(x, col), 0), '+') == 0 }, board)
+}
+
+let horizontal_win_p = (board_row:array(string)):bool => {
+    array_every((x) => { Char.compare(String.get(x, 0), '+') == 0 }, board_row)
+}
+
+let play = (playcount:int, bingo_number:string, b:array(array(array(string)))) => {
+    Array.iteri((idx, board) => {
+        for(i in 0 to Array.length(board) - 1) {
+            let inner_board = Array.get(board, i)
+            for(j in 0 to Array.length(inner_board) - 1) {
+                if(Array.get(inner_board, j) == bingo_number) {
+                    Array.set(inner_board, j, "+" ++ bingo_number)
+                } else {
+                    ()
+                }
+            }
+            if(horizontal_win_p(inner_board)) {
+                print_endline("board: " ++ string_of_int(idx) ++ " won on play: " ++ string_of_int(playcount) ++ " horizontally")
+            } else {
+                ()
+            }
+            if(vertical_win_p(board, i)) {
+                print_endline("board: " ++ string_of_int(idx) ++ " won on play: " ++ string_of_int(playcount) ++ " vertically")
+            } else {
+                ()
+            }
+        }
+    }, b)
+}
+
 let fh = open_in(Array.get(Sys.argv, 1))
 let bing_stream = iter_channel(fh)
 let bingo_numbers = Stream.next(bing_stream)
 let numbers_split_re = Str.regexp(",")
 let initboards = ref([])
 let curboard = ref([||])
-print_endline("here?")
 Stream.iter((x) => {
-    print_endline("89: " ++ x)
+    print_endline("152: " ++ x)
     switch(x) {
         | "" => {
-            initboards := List.append(initboards^, [curboard^])
+            if(Array.length(curboard^) != 0) {
+                initboards := List.append(initboards^, [curboard^])
+            } else {
+                ()
+            }
             curboard := Array.make_matrix(5, 5, "")
         }
         | _ => {
@@ -124,3 +171,8 @@ let boards = Array.of_list(initboards^)
 Array.iter((x) => {
     show_board(x, 0)
 }, boards)
+
+print_endline("Let's play a game:")
+Array.iteri((pc, x) => {
+    play(pc, x, boards)
+}, numbers)
