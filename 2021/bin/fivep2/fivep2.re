@@ -36,6 +36,10 @@ let order_points = (s:int, t:int): (int, int) => {
     }
 }
 
+let islope = (x0:int, y0:int, x1:int, y1:int):int => {
+    (y1 - y0) / (x1 - x0)
+}
+
 let calculate_line = (x0:int, y0:int, x1:int, y1:int):array((int, int)) => {
     let res = ref([])
     if(x0 == x1) {
@@ -49,7 +53,10 @@ let calculate_line = (x0:int, y0:int, x1:int, y1:int):array((int, int)) => {
             res := List.append([(dx, y0)], res^)
         }
     } else {
-        ()
+        let slope = islope(x0, y0, x1, y1)
+        let dx = ref(x0)
+        let dy = ref(y0)
+        // use the slope to modify dx, and distance to know how many points
     }
     Array.of_list(res^)
 }

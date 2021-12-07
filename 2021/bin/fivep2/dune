@@ -1,0 +1,3 @@
+(executable
+    (name fivep2)
+    (libraries Str))
