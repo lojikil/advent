@@ -23,9 +23,14 @@ let array_every = (fn: ('a => bool), a:array('a)):bool => {
 
 let mark_point = (b:array(array(int)), point: (int, int)) => {
     print_endline("in mark_point")
+    let lim = Array.length(b)
     let (x, y) = point
-    let inner = Array.get(b, y)
-    Array.set(inner, x, Array.get(inner, x) + 1)
+    if(x < 0 || y < 0 || x >= lim || y >= lim ) {
+        ()
+    } else {
+        let inner = Array.get(b, y)
+        Array.set(inner, x, Array.get(inner, x) + 1)
+    }
 }
 
 let order_points = (s:int, t:int): (int, int) => {
@@ -38,6 +43,15 @@ let order_points = (s:int, t:int): (int, int) => {
 
 let islope = (x0:int, y0:int, x1:int, y1:int):int => {
     (y1 - y0) / (x1 - x0)
+}
+
+let idistance = (x0:int, y0:int, x1:int, y1:int):int => {
+    let fx0 = float_of_int(x0)
+    let fy0 = float_of_int(y0)
+    let fx1 = float_of_int(x1)
+    let fy1 = float_of_int(y1)
+    let distance = Float.sqrt(Float.pow(fx1 -. fx0, 2.) +. Float.pow(fy1 -. fy0, 2.))
+    int_of_float(Float.floor(distance))
 }
 
 let calculate_line = (x0:int, y0:int, x1:int, y1:int):array((int, int)) => {
@@ -54,9 +68,28 @@ let calculate_line = (x0:int, y0:int, x1:int, y1:int):array((int, int)) => {
         }
     } else {
         let slope = islope(x0, y0, x1, y1)
+        let distance = idistance(x0, y0, x1, y1)
         let dx = ref(x0)
         let dy = ref(y0)
+        if(x1 < x0 && y1 < y0) {
+            print_endline("we swapped points")
+            dx := x1
+            dy := y1
+        } else {
+            ()
+        }
         // use the slope to modify dx, and distance to know how many points
+        print_endline("slope: " ++ string_of_int(slope))
+        for(_ in 0 to distance) {
+            print_endline("sloping: " ++ string_of_int(dx^) ++ "," ++ string_of_int(dy^))
+            if(dx^ > x1 && dy^ > y1 && slope < 0) {
+                ()
+            } else {
+                res := List.append([(dx^, dy^)], res^)
+                dx := dx^ + slope
+                dy := dy^ + 1
+            }
+        }
     }
     Array.of_list(res^)
 }
