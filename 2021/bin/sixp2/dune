@@ -1,0 +1,3 @@
+(executable
+    (name sixp2)
+    (libraries Str))

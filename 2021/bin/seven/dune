@@ -1,0 +1,3 @@
+(executable
+    (name seven)
+    (libraries Str))
