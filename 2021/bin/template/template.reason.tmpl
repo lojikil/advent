@@ -1,0 +1,28 @@
+let iter_channel = (s:in_channel) => {
+    Stream.from((_) => {
+        switch(input_line(s)) {
+            | f => Some(f)
+            | exception End_of_file => None
+        }
+    })
+}
+
+let array_every = (fn: ('a => bool), a:array('a)):bool => {
+    let rec inner = (idx:int):bool => {
+        if(idx >= Array.length(a)) {
+            true
+        } else if(fn(Array.get(a, idx))) {
+            inner(idx + 1)
+        } else {
+            false
+        }
+    }
+    inner(0)
+}
+
+let fh = open_in(Array.get(Sys.argv, 1))
+let stream = iter_channel(fh)
+
+Stream.iter((x) => {
+    print_endline(x)
+}, stream)
