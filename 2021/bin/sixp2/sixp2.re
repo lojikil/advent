@@ -47,6 +47,19 @@ print_endline(initstateline)
 let comma_re = Str.regexp(",")
 let initstate = List.map((x) => { int_of_string(x) }, Str.split(comma_re, initstateline))
 let state = ref(Array.of_list(initstate))
+/*
+ * We can do this with two counters:
+ *
+ * - the current fish's state
+ * - the number of fish spawned
+ *
+ * and then, instead of creating an array, we just iterate over the number of fish
+ * we have, and simulate the full life cycle of the fish from there
+ *
+ * I do suspect that there's an even easier way, since we know that basically modulo 7
+ * fish will do certain things, so give an initial state we can likely detect what that
+ * individual fish will do in a given number of days
+ */
 for(day in 1 to days) {
     if(day == 1) {
         print_string("After  1 day: ")
