@@ -1,0 +1,3 @@
+(executable
+    (name tenp2)
+    (libraries Str))
