@@ -45,15 +45,15 @@ let walk_nodes = (graph, start) => {
                     ()
                 }
                 | e when String.equal(e, "end") => {
-                    print_endline(List.fold_right((x, y) => { x ++ ", " ++ y }, List.append([x], path), ""))
+                    print_endline(List.fold_right((x, y) => { x ++ ", " ++ y }, List.append(path, [x]), ""))
                 } 
                 | _ => {
-                    inner_walk(graph, x, List.append([x], seen), List.append([x], path))
+                    inner_walk(graph, x, List.append(seen, [x]), List.append(path, [x]))
                 }
             }
         }, new_nodes)
     }
-    inner_walk(graph, start, [], [])
+    inner_walk(graph, start, [], ["start"])
 }
 
 let fh = open_in(Array.get(Sys.argv, 1))
