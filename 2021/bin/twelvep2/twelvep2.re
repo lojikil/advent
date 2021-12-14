@@ -22,6 +22,11 @@ let array_every = (fn: ('a => bool), a:array('a)):bool => {
 
 let smallnode_re = Str.regexp("[a-z]+")
 
+// so for part 2, what we need to do is scan the graph,
+// and see if there is a small node that is the sole entrance
+// to another subgraph, and, if so, allow it to be traversed
+// twice
+
 let walk_nodes = (graph, start) => {
     // walk the graph, starting with node "start"
     // iterate through the connected nodes, and stopping if
