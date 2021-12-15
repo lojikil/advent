@@ -20,27 +20,62 @@ let array_every = (fn: ('a => bool), a:array('a)):bool => {
     inner(0)
 }
 
+let matrix_get = (b:array(array(int)), x:int, y:int):option(int) => {
+    if(x >= 0 && x < Array.length(b)) {
+        let inner_array = Array.get(b, x)
+        if(y >= 0 && y < Array.length(inner_array)) {
+            Some(Array.get(inner_array, y))
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+let matrix_set = (b:array(array(int)), x:int, y:int, v:int):unit => {
+    if(x >= 0 && x < Array.length(b)) {
+        let inner_array = Array.get(b, x)
+        if(y >= 0 && y < Array.length(inner_array)) {
+            Array.set(inner_array, y, v)
+        } else {
+            ()
+        }
+    } else {
+        ()
+    }
+}
+
+let clamped_points = (b:array(array(int)), x:int, y:int) => {
+    if(x >= 0 && x < Array.length(b)) {
+        let inner_array = Array.get(b, x)
+        if(y >= 0 && y < Array.length(inner_array)) {
+            Some((x, y))
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
 let walk_nodes = (board:array(array(int))) => {
-    let rec inner_walk = (graph, start, seen, path) => {
+    let max_x = Array.length(board)
+    ley max_y = Array.length(Array.get(board, 0))
+    let rec inner_walk = (graph, startx, starty, risk) => {
+        let new_nodes = [clamped_points(b, x + 1, y), clamped_points(b, x, y + 1)]
         List.iter((x) => {
             switch(x) {
-                | c when Str.string_match(smallnode_re, c, 0) && List.mem(c, seen) => {
-                    // we've already seen the small node, don't traverse
-                    ()
+                | (ex, ey) when (ex == max_x && ey == max_y) => {
+                    // we hit the end, return sum
                 }
-                | s when String.equal(s, "start") => {
-                    ()
-                }
-                | e when String.equal(e, "end") => {
-                    print_endline(List.fold_right((x, y) => { x ++ ", " ++ y }, List.append(path, [x]), ""))
-                }
-                | _ => {
-                    inner_walk(graph, x, List.append(seen, [x]), List.append(path, [x]))
+                | (dx, dy) => {
+                    inner_walk(board, dx, dy, risk + value )
                 }
             }
         }, new_nodes)
     }
-    inner_walk(graph, start, [], ["start"])
+    inner_walk(graph, 0, 0, 0)
 }
 
 let show_board = (b:array(array(int))) => {
