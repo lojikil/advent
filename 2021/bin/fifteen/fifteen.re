@@ -60,22 +60,29 @@ let clamped_points = (b:array(array(int)), x:int, y:int) => {
 }
 
 let walk_nodes = (board:array(array(int))) => {
-    let max_x = Array.length(board)
-    ley max_y = Array.length(Array.get(board, 0))
-    let rec inner_walk = (graph, startx, starty, risk) => {
-        let new_nodes = [clamped_points(b, x + 1, y), clamped_points(b, x, y + 1)]
-        List.iter((x) => {
-            switch(x) {
-                | (ex, ey) when (ex == max_x && ey == max_y) => {
-                    // we hit the end, return sum
+    let max_x = Array.length(board) - 1
+    let max_y = Array.length(Array.get(board, 0)) - 1
+    print_endline("max x,y: " ++ string_of_int(max_x) ++ "," ++ string_of_int(max_y))
+    let rec inner_walk = (x, y, risk) => {
+        let new_nodes = [clamped_points(board, x + 1, y), clamped_points(board, x, y + 1)]
+        print_endline("in inner_walk, have: " ++ string_of_int(List.length(new_nodes)) ++ " nodes to walk")
+        List.iter((cur_coords) => {
+            switch(cur_coords) {
+                | Some((ex, ey)) when (ex == max_x && ey == max_y) => {
+                    print_endline("risk for this path: " ++ string_of_int(risk))
                 }
-                | (dx, dy) => {
-                    inner_walk(board, dx, dy, risk + value )
+                | Some((dx, dy)) => {
+                    let value = Option.value(matrix_get(board, dx, dy), ~default=0)
+                    print_endline("walking to: " ++ string_of_int(dx) ++ "," ++ string_of_int(dy))
+                    inner_walk(dx, dy, risk + value )
+                }
+                | None => {
+                    ()
                 }
             }
         }, new_nodes)
     }
-    inner_walk(graph, 0, 0, 0)
+    inner_walk(0, 0, 0)
 }
 
 let show_board = (b:array(array(int))) => {
@@ -143,17 +150,4 @@ Stream.iter((x) => {
 
 let finalboard = Array.of_list(initboard^)
 show_board(finalboard)
-let sum = ref(0)
-for(dx in 0 to Array.length(finalboard) - 1) {
-    let innerboard = Array.get(finalboard, dx)
-    for(dy in 0 to Array.length(innerboard) - 1) {
-        if(risky(finalboard, dx, dy)) {
-            let risk = Option.value(matrix_get(finalboard, dx, dy), ~default=0) + 1
-            sum := sum^ + risk
-            print_endline("position: " ++ string_of_int(dx) ++ "," ++ string_of_int(dy) ++ ":" ++ string_of_int(risk))
-        } else {
-            ()
-        }
-    }
-}
-print_endline("total risk: " ++ string_of_int(sum^))
+walk_nodes(finalboard)
