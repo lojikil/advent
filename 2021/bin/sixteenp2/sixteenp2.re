@@ -123,6 +123,20 @@ let length_of_literal = (src:string, offset:int):int => {
     (ioffset^) - offset
 }
 
+/*
+
+Literal values (type ID 4) represent a single number as described above. The remaining type IDs are more interesting:
+
+Packets with type ID 0 are sum packets - their value is the sum of the values of their sub-packets. If they only have a single sub-packet, their value is the value of the sub-packet.
+Packets with type ID 1 are product packets - their value is the result of multiplying together the values of their sub-packets. If they only have a single sub-packet, their value is the value of the sub-packet.
+Packets with type ID 2 are minimum packets - their value is the minimum of the values of their sub-packets.
+Packets with type ID 3 are maximum packets - their value is the maximum of the values of their sub-packets.
+Packets with type ID 5 are greater than packets - their value is 1 if the value of the first sub-packet is greater than the value of the second sub-packet; otherwise, their value is 0. These packets always have exactly two sub-packets.
+Packets with type ID 6 are less than packets - their value is 1 if the value of the first sub-packet is less than the value of the second sub-packet; otherwise, their value is 0. These packets always have exactly two sub-packets.
+Packets with type ID 7 are equal to packets - their value is 1 if the value of the first sub-packet is equal to the value of the second sub-packet; otherwise, their value is 0. These packets always have exactly two sub-packets.
+
+*/
+
 let rec packet_of_bitstream = (src:string, offset:int) => {
     let version = version_of_bitstream(src, offset)
     let typeid = type_of_bitstream(src, offset)

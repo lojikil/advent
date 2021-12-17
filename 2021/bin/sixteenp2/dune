@@ -1,0 +1,3 @@
+(executable
+    (name sixteenp2)
+    (libraries Str))
