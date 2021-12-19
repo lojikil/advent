@@ -108,9 +108,18 @@ let length_of_bitstream = (src:string, offset:int, cnt:int):int => {
     res^
 }
 
-let length_of_literal = (src:string, offset:int):int => {
+let integer_of_bitstring = (src:string, offset:int, cnt:int):int => {
+    let res = ref(0)
+    for(idx in 0 to cnt - 1) {
+        let tmp = Int.abs(Char.compare('0', String.get(src, offset + idx)))
+        res := res^ + (tmp * (1 lsl (cnt - idx - 1)))
+    }
+    res^
+}
+
+let length_of_literal = (src:string, offset:int):(int, int) => {
     let cont = ref(true)
-    //let res = ref(0)
+    let res = ref([])
     let ioffset = ref(offset + 6)
     while(cont^) {
         if(String.get(src, ioffset^) == '0') {
@@ -118,9 +127,14 @@ let length_of_literal = (src:string, offset:int):int => {
         } else {
             ()
         }
+        res := List.append(res^, [String.sub(src, ioffset^ + 1, 4)])
         ioffset := ioffset^ + 5
     };
-    (ioffset^) - offset
+    let lvs = String.concat("", res^);
+    let lvi = integer_of_bitstring(lvs, 0, String.length(lvs))
+    print_endline("literal value: " ++ lvs);
+    print_endline("integer value: " ++ string_of_int(lvi));
+    (lvi, (ioffset^) - offset)
 }
 
 /*
@@ -137,23 +151,85 @@ Packets with type ID 7 are equal to packets - their value is 1 if the value of t
 
 */
 
+let operation_of_typeid = fun
+    | 0 => "sum"
+    | 1 => "mul"
+    | 2 => "min"
+    | 3 => "max"
+    | 4 => "literal"
+    | 5 => "gt"
+    | 6 => "lt"
+    | 7 => "eq"
+    | _ => "nop"
+
+let applyeval = (optype:int, operands:list(int)) => {
+    switch(optype) {
+        | 0 => { 
+            List.fold_left((x, y) => { x + y }, 0, operands)
+        }
+        | 1 => List.fold_left((x, y) => { x * y }, 1, operands)
+        | 2 => {
+            let first = List.hd(operands)
+            List.fold_left((x, y) => { if(x < y) { x } else { y } }, first, List.tl(operands))
+        }
+        | 3 => {
+            let first = List.hd(operands)
+            List.fold_left((x, y) => { if(x > y) { x } else { y } }, first, List.tl(operands))
+        }
+        | 5 => {
+            let first = List.hd(operands)
+            let second = List.hd(List.tl(operands))
+            if(first > second) {
+                1
+            } else {
+                0
+            }
+        }
+        | 6 => {
+            let first = List.hd(operands)
+            let second = List.hd(List.tl(operands))
+            if(first < second) {
+                1
+            } else {
+                0
+            }
+        }
+        | 7 => {
+            let first = List.hd(operands)
+            let second = List.hd(List.tl(operands))
+            if(first == second) {
+                1
+            } else {
+                0
+            }
+        }
+        | _ => 1
+    }
+}
+    
+
 let rec packet_of_bitstream = (src:string, offset:int) => {
     let version = version_of_bitstream(src, offset)
     let typeid = type_of_bitstream(src, offset)
+    let operands = ref([])
     print_endline("version: " ++ string_of_int(version))
+    print_endline("operation: " ++ operation_of_typeid(typeid))
     switch(typeid) {
         | 4 => {
-            print_endline("literal packet, length: " ++ string_of_int(length_of_literal(src, offset)))
-            length_of_literal(src, offset)
+            let (lvi, len) = length_of_literal(src, offset)
+            print_endline("literal packet, length: " ++ string_of_int(len));
+            (lvi, len)
         }
         | _ when (String.get(src, 6 + offset) == '0') => {
             let cnt = length_of_bitstream(src, offset, 15)
             let ioffset = ref(offset + 22) 
             print_endline("operator packet 15 bit length packet: " ++ string_of_int(cnt))
             while(ioffset^ < (offset + 22 + cnt)) {
-                ioffset := ioffset^ + packet_of_bitstream(src, ioffset^) 
+                let (nv, no) = packet_of_bitstream(src, ioffset^)
+                operands := List.append(operands^, [nv])
+                ioffset := ioffset^ + no
             };
-            22 + cnt
+            (applyeval(typeid, operands^), 22 + cnt);
         }
         | _ => {
             let cnt = length_of_bitstream(src, offset, 11)
@@ -161,9 +237,11 @@ let rec packet_of_bitstream = (src:string, offset:int) => {
             print_endline("11-bit count packet: " ++ string_of_int(cnt))
             for(i in 1 to cnt) {
                 print_endline("parsing next subpacket: " ++ string_of_int(i))
-                ioffset := ioffset^ + packet_of_bitstream(src, ioffset^)
-            }
-            ioffset^ - offset
+                let (nv, no) = packet_of_bitstream(src, ioffset^)
+                operands := List.append(operands^, [nv])
+                ioffset := ioffset^ + no
+            };
+            (applyeval(typeid, operands^), ioffset^ - offset)
         }
     }
 }
@@ -174,5 +252,6 @@ let stream = iter_channel(fh)
 Stream.iter((x) => {
     print_endline(x)
     print_endline(bitstring_of_string(x))
-    let _ = packet_of_bitstream(bitstring_of_string(x), 0)
+    let (v, _) = packet_of_bitstream(bitstring_of_string(x), 0)
+    print_endline("final value: " ++ string_of_int(v))
 }, stream)
