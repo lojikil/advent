@@ -129,43 +129,29 @@ Stream.iter((x) => {
         let endy = Str.matched_group(5, x)
         let startz = Str.matched_group(6, x)
         let endz = Str.matched_group(7, x)
-        print_string("range " ++ startx ++ "..." ++ endx ++ "," ++ starty ++ "..." ++ endy)
-        print_endline("," ++ startz ++ "..." ++ endz ++ " " ++ cmd)
         let (ixs, ixe, iys, iye, izs, ize) = make_coords(startx, endx, starty, endy, startz, endz)
-        if(check_coords(ixs, ixe, iys, iye, izs, ize)) {
-            for(x in ixs to ixe) {
-                for(y in iys to iye) {
-                    for(z in izs to ize) {
-                        let pos = calc_pos(midpoint, x, y, z)
-                        //print_endline("turning: " ++ string_of_int(pos) ++ " " ++ cmd)
-                        if(cmd == "on") {
-                            Array.set(board, pos, 1)
-                            Hashtbl.replace(hboard, (x, y, z), 1)
-                        } else {
-                            Array.set(board, pos, 0)
-                            Hashtbl.replace(hboard, (x, y, z), 0)
-                        }
+        // thinking about this:
+        // could store all the ranges (off, on)
+        // then bound the "on" ranges by what is turned off
+        // that way, we're only turning on things that actually
+        // matter...
+        for(x in ixs to ixe) {
+            for(y in iys to iye) {
+                for(z in izs to ize) {
+                    if(cmd == "on") {
+                        Hashtbl.replace(hboard, (x, y, z), 1)
+                    } else {
+                        Hashtbl.replace(hboard, (x, y, z), 0)
                     }
                 }
             }
-       } else {
-           ()
-       }
+        }
     } else {
         ()
     }
 }, linestream)
 
 let sum = ref(0)
-for(idx in 0 to board_size - 1) {
-    if(Array.get(board, idx) == 1) {
-        sum := sum^ + 1
-    } else {
-        ()
-    }
-}
-print_endline("sum: " ++ string_of_int(sum^))
-sum := 0
 Hashtbl.iter((_, y) => {
     //let (ix, iy, iz) = x
     if(y == 1) {
