@@ -238,7 +238,7 @@ let dump_state = (state:alu_state):unit => {
     print_endline("v: " ++ string_of_int(state.iv_offset))
 }
 
-let increment_iv = (iv:array(int)):unit => {
+let increment_iv = (iv:array(int)):bool => {
     // we always want to increment at least one
     let carry = ref(1)
     // we really could do this "while carry == 1"
@@ -253,36 +253,34 @@ let increment_iv = (iv:array(int)):unit => {
             }
             | _ => ()
         }
-    }
+    };
+    !(carry^ == 1)
 }
 
 let fuzz_monad = (src:list(instruction)):unit => {
     let iv = [|3,3,3,3,3,3,3,3,3,3,3,3,3,3|]
     let cont = ref(true)
-    let state = {
-        input_values:iv,
-        iv_offset:0,
-        w:0,
-        x:0,
-        y:0,
-        z:0,
-        ip:0
-    }
-    List.iter((inst) => {
-        micro_execute(inst, state)
-    }, src)
     while(cont^) {
+        let state = {
+            input_values:iv,
+            iv_offset:0,
+            w:0,
+            x:0,
+            y:0,
+            z:0,
+            ip:0
+        }
+        List.iter((inst) => {
+            micro_execute(inst, state)
+        }, src)
         if(state.z == 0) {
             print_endline("found a match: ")
             Array.iter((x) => {print_string(string_of_int(x) ++ " ") }, iv)
             print_newline()
-            cont := false
         } else {
-            print_endline("no match")
-            increment_iv(iv)
-            Array.iter((x) => {print_string(string_of_int(x) ++ " ") }, iv)
-            print_newline()
+            ()
         }
+        cont := increment_iv(iv)
     }
 }
 
