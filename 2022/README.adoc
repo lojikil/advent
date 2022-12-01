@@ -1,0 +1,11 @@
+= Advent 2022
+
+I'm going it again in Reason, although I'll probably try my hand at coastML as well
+
+== Day one
+
+. part one: simple accumulation loop
+. part two:
+.. modify it to output the accumulations
+.. `onep2.exe | grep -E '^accum' | sort`
+.. `expr top1 + top2 + top3`
