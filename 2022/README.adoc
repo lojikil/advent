@@ -9,3 +9,8 @@ I'm going it again in Reason, although I'll probably try my hand at coastML as w
 .. modify it to output the accumulations
 .. `onep2.exe | grep -E '^accum' | sort`
 .. `expr top1 + top2 + top3`
+
+== Day Two
+
+. part one: simple `play` lambda that plays hands of RPS
+. part two: new lambda to rewrite input and then `play` the hand based on the strategic advice
