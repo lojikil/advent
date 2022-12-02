@@ -2,6 +2,9 @@
 
 I'm going it again in Reason, although I'll probably try my hand at coastML as well
 
+I definitely can rewrite most of these to be more _functional_, carrying less state around & avoiding `Stream.iter`, but
+also I'm relatively comfortable with the style...
+
 == Day one
 
 . part one: simple accumulation loop
