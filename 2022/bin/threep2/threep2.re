@@ -21,12 +21,57 @@ let rec search_score = (needle:string, haystack:string, idx:int):int => {
     }
 };
 
+let score = (c:char):int => {
+    switch(c) {
+        | n when (Char.compare(n, 'a') > 0) => Char.code(n) - Char.code('a') + 1;
+        | n => Char.code(n) - Char.code('A') + 27;
+    }
+};
+
+// List has `sort_uniq` which actually does this, so I probably should have
+// used that...
 let rec uniq = (a:array(char), idx:int, accum:list(char)):list(char) => {
     switch(Array.get(a, idx)) {
         | c when List.length(accum) > 0 && List.hd(accum) == c => uniq(a, idx + 1, accum);
         | c => uniq(a, idx + 1, List.cons(c, accum));
         | exception Invalid_argument(_) => accum;
     }
+};
+
+let uniqify = (src:string):list(char) => {
+    String.to_seq(src) |> List.of_seq |> List.sort_uniq(Char.compare, _)
+};
+
+let combine_triples = (src:string, src1:string, src2:string):list(char) => {
+    List.concat([uniqify(src), uniqify(src1), uniqify(src2)]) |> List.sort(Char.compare, _);
+};
+
+let counter = (state:(int, char, list((char, int))), src:char) => {
+    let (cur_count, cur_char, cur_assq) = state;
+
+    if(src == cur_char) {
+        (cur_count + 1, cur_char, cur_assq)
+    } else {
+        (1, src, List.cons((cur_char, cur_count), cur_assq))
+    }
+};
+
+let cmp_v = (a, b) => {
+    let (a_c, a_n) = a;
+    let (b_c, b_n) = b;
+    if(a_n > b_n) {
+        a
+    } else {
+        b
+    }
+};
+
+let tally = (s, s1, s2) => {
+    let totals = combine_triples(s, s1, s2);
+    let (_, _, counts) = List.fold_left(counter, (0, ' ', [('$', 0)]), totals);
+    let max_v = List.fold_left(cmp_v, (' ', 0), counts);
+    let (c, _) = max_v;
+    score(c);
 };
 
 
