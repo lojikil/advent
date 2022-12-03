@@ -17,3 +17,8 @@ also I'm relatively comfortable with the style...
 
 . part one: simple `play` lambda that plays hands of RPS
 . part two: new lambda to rewrite input and then `play` the hand based on the strategic advice
+
+== Day Three
+
+. part one: slice strings in half, find the matching value in both containers
+. part two: group elves together, and do a few folds over sorts to reduce the groups nicely

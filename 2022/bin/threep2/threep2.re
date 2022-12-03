@@ -57,9 +57,9 @@ let counter = (state:(int, char, list((char, int))), src:char) => {
 };
 
 let cmp_v = (a, b) => {
-    let (a_c, a_n) = a;
-    let (b_c, b_n) = b;
-    if(a_n > b_n) {
+    let (_, a_n) = a;
+    let (_, b_n) = b;
+    if(a_n >= b_n) {
         a
     } else {
         b
@@ -68,12 +68,17 @@ let cmp_v = (a, b) => {
 
 let tally = (s, s1, s2) => {
     let totals = combine_triples(s, s1, s2);
-    let (_, _, counts) = List.fold_left(counter, (0, ' ', [('$', 0)]), totals);
-    let max_v = List.fold_left(cmp_v, (' ', 0), counts);
-    let (c, _) = max_v;
+    // XXX *gosh* Ok, so I forgot that we will return state for the last item *and it will not be processed*
+    // so here, when the *last* item of the group was the mode, we wouldn't find it, because it was 
+    // stored not in the alist but in the state for the reducer
+    let (last_count, last_char, counts) = List.fold_left(counter, (0, ' ', [('$', 0)]), totals);
+    let max_v = List.fold_left(cmp_v, (' ', 0), List.cons((last_char, last_count), counts));
+    let (c, n) = max_v;
+    print_string("actual character for triples [" ++ s ++ "," ++ s1 ++ "," ++ s2 ++ "] is: ");
+    print_char(c);
+    print_endline("\nwith count: " ++ string_of_int(n));
     score(c);
 };
-
 
 let iter_channel = (s:in_channel) => {
     Stream.from((_) => {
@@ -86,11 +91,18 @@ let iter_channel = (s:in_channel) => {
 
 let fh = open_in(Array.get(Sys.argv, 1))
 let sum = ref(0);
+let lines = ref([]);
+let cnt = ref(0);
 Stream.iter((x) => {
-    let left = String.sub(x, 0, String.length(x) / 2);
-    let right = String.sub(x, String.length(x) / 2, String.length(x) / 2);
-    let score = search_score(left, right, 0);
-    sum := sum^ + score;
-    print_endline("Score: " ++ string_of_int(score));
+    lines := List.cons(x, lines^);
+    print_endline("adding rucksack: " ++ x);
+    cnt := cnt^ + 1;
+    if(List.length(lines^) >= 3) {
+        let score = tally(List.nth(lines^, 0), List.nth(lines^, 1), List.nth(lines^, 2));
+        print_endline("Score for current triple set: " ++ string_of_int(score));
+        sum := sum^ + score;
+        lines := [];
+    }
 }, iter_channel(fh));
-print_endline("total score: " ++ string_of_int(sum^));
+print_endline("Total: " ++ string_of_int(sum^));
+print_endline("Counted " ++ string_of_int(cnt^) ++ " rucksacks");
