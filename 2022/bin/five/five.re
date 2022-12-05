@@ -34,7 +34,7 @@ let parse = (src:string) => {
     switch(len) {
         | _ when String.starts_with(~prefix="stack", src) => {
             let stack_num = int_of_string(List.nth(parts, 1));
-            let init_stack = drop_until(2, parts);
+            let init_stack = List.tl(List.tl(parts))
             Stacks(stack_num, init_stack)
         }
         | _ when String.starts_with(~prefix="move", src) => {
@@ -78,50 +78,37 @@ let clamp = (i:int):int => {
     }
 }
 
-let cranelift = (src:array(string), dst: array(string), cnt:int):unit => {
-    let src_top = find_top(src);
-    let dst_top = find_top(dst);
+let rec cranelift = (src:list(string), dst: list(string), cnt:int):(list(string), list(string)) => {
     // technically, I think this is what the `Array.blit` method if for...
-    print_endline("here on 76 with: " ++ string_of_int(cnt));
-    let rec inner_lift = (src_idx:int, dst_idx, tnc) => {
-        print_endline("here on 78 with " ++ string_of_int(src_idx) ++ ", " ++ string_of_int(dst_idx) ++ ", " ++ string_of_int(tnc));
-        switch((src_idx, dst_idx, tnc)) {
-            | (_, _, 0) => ()
-            | (_, _, n) when n <= 0 => ()
-            | (a, b, c) when (a >= 0 && b >= 0 && b <= 200) => {
-                let t = Array.get(src, a);
-                Array.set(src, a, "");
-                Array.set(dst, b, t);
-                inner_lift(src_idx - 1, dst_idx + 1, c - 1);
-            }
-            | (_, _, _) => ()
+    print_endline("Source: " ++ String.concat("", src));
+    print_endline("Destination: " ++ String.concat("", dst));
+    switch(cnt) {
+        | 0 => (src, dst)
+        | _ => {
+            let t = List.hd(src)
+            cranelift(List.tl(src), List.cons(t, dst), cnt - 1);
         }
-    };
-    inner_lift(clamp(src_top - 1), clamp(dst_top - 1), cnt);
-}
+    }
+};
 
-let microx = (stacks:array(array(string)), eso:elfstacksops):unit => {
+let microx = (stacks:array(list(string)), eso:elfstacksops):unit => {
     switch(eso) {
         | Stacks(n, s) => {
-            let t = Array.of_list(s);
-            let dst = Array.get(stacks, n);
-            Array.iteri((i, v) => {
-                print_endline("adding " ++ v);
-                Array.set(dst, i, v);
-            }, t);
+            Array.set(stacks, n, s);
         }
         | Move(n, m, p) => {
             let stack_m = Array.get(stacks, m);
             let stack_p = Array.get(stacks, p);
-            cranelift(stack_m, stack_p, n);
+            let (new_m, new_p) = cranelift(stack_m, stack_p, n);
+            Array.set(stacks, m, new_m);
+            Array.set(stacks, p, new_p);
         }
         | Nop => ()
     }
 };
 
 let fh = open_in(Array.get(Sys.argv, 1));
-//Alet stacks = Array.make(10, [""]);
-let stacks = Array.make_matrix(10, 250, "");
+let stacks = Array.make(10, [""]);
 Stream.iter((x) => {
     let eso = parse(x);
     print_endline(show(eso));
@@ -129,4 +116,4 @@ Stream.iter((x) => {
 }, iter_channel(fh));
 Array.iteri((idx, l) => {
     print_string(string_of_int(idx) ++ ": ")
-    print_endline(String.concat(" ", List.of_seq(Array.to_seq(l)))) }, stacks);
+    print_endline(String.concat(" ", l)) }, stacks);

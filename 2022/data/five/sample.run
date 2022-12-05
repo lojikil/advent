@@ -1,5 +1,5 @@
-stack 1 Z N
-stack 2 M C D
+stack 1 N Z
+stack 2 D C M
 stack 3 P
 
 move 1 from 2 to 1
