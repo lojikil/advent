@@ -107,13 +107,54 @@ let microx = (stacks:array(list(string)), eso:elfstacksops):unit => {
     }
 };
 
+let rec take = (~accum:list(string) = [], src:list(string), i:int) => {
+    switch(src) {
+        | _ when i == 0 => (List.rev(accum), src);
+        | _ => take(~accum=List.cons(List.hd(src), accum), List.tl(src), i - 1);
+    }
+};
+
+let cranelift9k1 = (src:list(string), dst: list(string), cnt:int):(list(string), list(string)) => {
+    // technically, I think this is what the `Array.blit` method if for...
+    print_endline("Source: " ++ String.concat("", src));
+    print_endline("Destination: " ++ String.concat("", dst));
+    switch(cnt) {
+        | 0 => (src, dst)
+        | _ => {
+            let (new_head, new_tail) = take(src, cnt);
+            (new_tail, List.append(new_head, dst))
+        }
+    }
+};
+
+let microx9k1 = (stacks:array(list(string)), eso:elfstacksops):unit => {
+    switch(eso) {
+        | Stacks(n, s) => {
+            Array.set(stacks, n, s);
+        }
+        | Move(n, m, p) => {
+            let stack_m = Array.get(stacks, m);
+            let stack_p = Array.get(stacks, p);
+            let (new_m, new_p) = cranelift9k1(stack_m, stack_p, n);
+            Array.set(stacks, m, new_m);
+            Array.set(stacks, p, new_p);
+        }
+        | Nop => ()
+    }
+};
+
 let fh = open_in(Array.get(Sys.argv, 1));
 let stacks = Array.make(10, [""]);
+let stacks9k1 = Array.make(10, [""]);
 Stream.iter((x) => {
     let eso = parse(x);
     print_endline(show(eso));
-    microx(stacks, eso)
+    microx(stacks, eso);
+    microx9k1(stacks9k1, eso);
 }, iter_channel(fh));
 Array.iteri((idx, l) => {
     print_string(string_of_int(idx) ++ ": ")
     print_endline(String.concat(" ", l)) }, stacks);
+Array.iteri((idx, l) => {
+    print_string(string_of_int(idx) ++ ": ")
+    print_endline(String.concat(" ", l)) }, stacks9k1);
