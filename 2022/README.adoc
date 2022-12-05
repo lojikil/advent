@@ -27,3 +27,11 @@ also I'm relatively comfortable with the style...
 
 . part one: just `compare` a bunch, but make sure you get fully overlapped edge cases (I didn't think of `(0, 0)` at first)
 . part two: literally just a giant chain of `&&`, `||`, and `<=` to check if any of the values were in range of one another
+
+== Day Five
+
+. part one: manually turn the puzzle input into a language, then parse the language
+. part two: add a new micro-executor that just handles the new crane spec
+
+Honestly, today was silly; sleep dep definitely got the best of me when doing things. I tripped myself up with `List.rev` at 
+some point as well. 
