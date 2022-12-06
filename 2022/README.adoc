@@ -35,3 +35,9 @@ also I'm relatively comfortable with the style...
 
 Honestly, today was silly; sleep dep definitely got the best of me when doing things. I tripped myself up with `List.rev` at 
 some point as well. 
+
+== Day Six
+
+. part one: use an alist to store characters we've seen, and if there's a member, we've seen, slide the window over by one
+. part two: added an optional `start_message` parameter, and change the sliding window to 14 if `true`
+.. I had figued this was coming and coded part one to support variable-sized windows to begin with
