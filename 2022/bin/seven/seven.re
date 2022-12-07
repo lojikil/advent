@@ -59,12 +59,15 @@ Stream.iter((x) => {
     }
 }, iter_channel(fh));
 vfs := List.cons((cwd^, sum^), vfs^)
+sum := 0
 List.iter((alist_entry) => {
     let (name, size) = alist_entry;
     print_string(name ++ " " ++ string_of_int(size));
     if(size <= 100000) {
+        sum := size + sum^;
         print_endline(" correctly sized");
     } else {
         print_endline(" wrong sized");
     }
 }, vfs^);
+print_endline("Total: " ++ string_of_int(sum^));
