@@ -30,6 +30,8 @@ Stream.iter((x) => {
                     // forward here...
                     vfs := List.cons((cwd^, sum^), vfs^);
                     cwd := String.sub(cwd^, 0, String.rindex(cwd^, '/'))
+                    let old_sum = List.assoc(cwd^, vfs^);
+                    vfs := List.cons((cwd^, sum^ + old_sum), List.remove_assoc(cwd^, vfs^));
                     sum := 0
                 }
                 | "/" => ()
