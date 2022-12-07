@@ -11,11 +11,15 @@ let is_numeric = (c:char):bool => {
     Char.code(c) >= 48 && Char.code(c) <= 57;
 }
 
+let make_paths = (cwd:string) => {
+    List.fold_left((x, y) => { List.cons(List.hd(x) ++ y ++ "/", x) }, [""], String.split_on_char('/', cwd));
+}
+
 let fh = open_in(Array.get(Sys.argv, 1));
 let cwd = ref("");
+let tbl = Hashtbl.create(~random=false, 10000);
 let sum = ref(0);
-let total = ref(0);
-let vfs = ref([("$", 0)]);
+let sizes = ref([]);
 
 Stream.iter((x) => {
     switch(x) {
@@ -23,24 +27,17 @@ Stream.iter((x) => {
             let parts = String.split_on_char(' ', d);
             let path = List.nth(parts, 2);
             print_endline("cwd: " ++ cwd^ ++ " path: " ++ path);
+            sum := 0
             switch(path) {
                 | ".." => {
                     // this state tracking would have been easy in a
                     // tail recursive lambda, but also it's straight
                     // forward here...
-                    vfs := List.cons((cwd^, sum^), vfs^);
                     cwd := String.sub(cwd^, 0, String.rindex(cwd^, '/'))
-                    let old_sum = List.assoc(cwd^, vfs^);
-                    vfs := List.cons((cwd^, sum^ + old_sum), List.remove_assoc(cwd^, vfs^));
-                    sum := 0
                 }
                 | "/" => ()
                 | _ => {
-                    print_endline("should be here... path: " ++ path ++ " base '" ++ cwd^ ++ "'");
-                    vfs := List.cons((cwd^, sum^), vfs^);
                     cwd := String.concat("/", [cwd^, path]);
-                    print_endline("sanity check: " ++ cwd^);
-                    sum := 0
                 }
             }
         }
@@ -52,22 +49,40 @@ Stream.iter((x) => {
         | file_size when is_numeric(String.get(x, 0)) => {
             let fparts = String.split_on_char(' ', file_size);
             let size = int_of_string(List.nth(fparts, 0));
-            sum := sum^ + size;
-            total := total^ + size;
+            List.iter((x) => {
+                print_endline("adding " ++ string_of_int(size) ++ " to " ++ x);
+                if(Hashtbl.mem(tbl, x)) {
+                    Hashtbl.replace(tbl, x, Hashtbl.find(tbl, x) + size);
+                } else {
+                    Hashtbl.add(tbl, x, size);
+                }
+            }, make_paths(cwd^));
         }
         | _ => ()
     }
 }, iter_channel(fh));
-vfs := List.cons((cwd^, sum^), vfs^)
-sum := 0
-List.iter((alist_entry) => {
-    let (name, size) = alist_entry;
-    print_string(name ++ " " ++ string_of_int(size));
+Hashtbl.iter((path, size) => {
     if(size <= 100000) {
         sum := size + sum^;
-        print_endline(" correctly sized");
+        print_endline(path ++ " is correctly sized");
     } else {
-        print_endline(" wrong sized");
+        print_endline(path ++ " is wrong sized: " ++ string_of_int(size));
     }
-}, vfs^);
-print_endline("Total: " ++ string_of_int(sum^));
+}, tbl);
+print_endline("part one final sum: " ++ string_of_int(sum^));
+
+let used = 70000000 - Hashtbl.find(tbl, "/");
+let reqd = 70000000 - 30000000;
+
+print_endline("Currently used: " ++ string_of_int(used));
+print_endline("Needed: " ++ string_of_int(reqd));
+print_endline("need to exceed: " ++ string_of_int(reqd - used));
+
+Hashtbl.iter((_, size) => {
+    if(size >= (reqd - used)) {
+        print_endline("Adding: " ++ string_of_int(size));
+        sizes := List.cons(size, sizes^);
+    } 
+}, tbl);
+sizes := List.sort(compare, sizes^);
+print_endline("part two: " ++ string_of_int(List.hd(sizes^)));
