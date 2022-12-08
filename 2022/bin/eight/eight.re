@@ -184,43 +184,60 @@ let count_board = (board:array(array(int)), max_row:int, max_col:int):int => {
 };
 
 let count_visible = (board:array(array(int)), row:int, col:int, max_row:int, max_col:int) => {
+    print_endline("checking scenery for: " ++ string_of_int(row) ++ "," ++ string_of_int(col));
     let rec count_rows_above = (accum:int, v:int, r:int, c:int):int => {
         let check_v = Array.get(Array.get(board, r), c);
+        print_endline("count_up: " ++ string_of_int(r) ++ "," ++ string_of_int(c));
         if (check_v >= v) {
-            accum;
+            print_endline("count_up v: " ++ string_of_int(accum));
+            accum + 1;
         } else if (r == 0) {
-            accum;
+            print_endline("count_up e: " ++ string_of_int(accum));
+            accum + 1;
         } else {
+            print_endline("count_up r: " ++ string_of_int(accum));
             count_rows_above(accum + 1, v, r - 1, c);
         }
     };
     let rec count_rows_below = (accum:int, v:int, r:int, c:int):int => {
         let check_v = Array.get(Array.get(board, r), c);
+        print_endline("count_down: " ++ string_of_int(r) ++ "," ++ string_of_int(c));
         if (check_v >= v) {
-            accum;
-        } else if (r == max_row) {
-            accum;
+            print_endline("count_down v: " ++ string_of_int(accum));
+            accum + 1;
+        } else if (r == (max_row - 1)) {
+            print_endline("count_down e: " ++ string_of_int(accum));
+            accum + 1;
         } else {
+            print_endline("count_down r: " ++ string_of_int(accum));
             count_rows_below(accum + 1, v, r + 1, c);
         }
     };
     let rec count_cols_left = (accum:int, v:int, r:int, c:int):int => {
         let check_v = Array.get(Array.get(board, r), c);
+        print_endline("count_left: " ++ string_of_int(r) ++ "," ++ string_of_int(c));
         if (check_v >= v) {
-            accum;
+            print_endline("count_left v: " ++ string_of_int(accum));
+            accum + 1;
         } else if (c == 0) {
-            accum;
+            print_endline("count_left e: " ++ string_of_int(accum));
+            accum + 1;
         } else {
+            print_endline("count_left r: " ++ string_of_int(accum));
             count_cols_left(accum + 1, v, r, c - 1);
         }
     };
     let rec count_cols_right = (accum: int, v:int, r:int, c:int):int => {
         let check_v = Array.get(Array.get(board, r), c);
+        print_endline("count_right: " ++ string_of_int(r) ++ "," ++ string_of_int(c));
         if (check_v >= v) {
-            accum;
-        } else if (c == max_col) {
-            accum;
+            print_endline("count_right v: " ++ string_of_int(accum));
+            accum + 1;
+        } else if (c == (max_col - 1)) {
+            print_endline("count_right e: " ++ string_of_int(accum));
+            accum + 1;
         } else {
+            print_endline("count_right r: " ++ string_of_int(accum));
             count_cols_right(accum + 1, v, r, c + 1);
         }
     }
@@ -234,15 +251,17 @@ let count_visible = (board:array(array(int)), row:int, col:int, max_row:int, max
 
 let scenic_board = (board:array(array(int)), max_row:int, max_col:int):int => {
     let rec find_max_scenery = (cur:int, r:int, c:int):int => {
-        let check_v = Array.get(Array.get(board, r), c);
-        if (r == max_row) {
+        if (r == (max_row - 1)) {
             cur;
-        } else if (c == max_col) {
+        } else if (c == (max_col - 1)) {
             find_max_scenery(cur, r + 1, 1);
-        } else if (check_v > cur) {
-            find_max_scenery(check_v, r, c + 1);
         } else {
-            find_max_scenery(cur, r, c + 1);
+            let check_v = count_visible(board, r, c, max_row, max_col);
+            if (check_v > cur) {
+                find_max_scenery(check_v, r, c + 1);
+            } else {
+                find_max_scenery(cur, r, c + 1);
+            }
         }
     }
     find_max_scenery(0, 1, 1);
@@ -290,3 +309,5 @@ print_endline("board count: " ++ string_of_int(total_size) ++ " visible: " ++ st
 print_endline("visible trees count: " ++ string_of_int(total_size - notviz_size));
 let scenary = scenic_board(board, max_row, max_col);
 print_endline("max scenary: " ++ string_of_int(scenary));
+print_endline("scenary for 3,2: " ++ string_of_int(count_visible(board, 3, 2, max_row, max_col)));
+print_endline("scenary for 1,2: " ++ string_of_int(count_visible(board, 1, 2, max_row, max_col)));
