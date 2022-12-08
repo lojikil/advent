@@ -72,17 +72,17 @@ Hashtbl.iter((path, size) => {
 print_endline("part one final sum: " ++ string_of_int(sum^));
 
 let used = 70000000 - Hashtbl.find(tbl, "/");
-let reqd = 70000000 - 30000000;
+let reqd = 30000000;
 
 print_endline("Currently used: " ++ string_of_int(used));
 print_endline("Needed: " ++ string_of_int(reqd));
 print_endline("need to exceed: " ++ string_of_int(reqd - used));
 
 Hashtbl.iter((_, size) => {
-    if(size >= (reqd - used)) {
+    if((used + size) >= reqd ) {
         print_endline("Adding: " ++ string_of_int(size));
         sizes := List.cons(size, sizes^);
-    } 
+    }
 }, tbl);
 sizes := List.sort(compare, sizes^);
 print_endline("part two: " ++ string_of_int(List.hd(sizes^)));
