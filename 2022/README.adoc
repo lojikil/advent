@@ -41,3 +41,16 @@ some point as well.
 . part one: use an alist to store characters we've seen, and if there's a member, we've seen, slide the window over by one
 . part two: added an optional `start_message` parameter, and change the sliding window to 14 if `true`
 .. I had figued this was coming and coded part one to support variable-sized windows to begin with
+
+== Day Seven
+
+. part one: build a hashtable and add sizes to the whole path
+. part two: subtract two numbers
+
+== Day Eight
+
+. part one: manually iterated over all trees and checked visibility
+. part two: took the code from part one and made it count rather than return a boolean
+
+Honestly, this should have been done with a visibility matrix: I should have computed the weights ahead of time so look ups
+would just check the neighbors' values, but the way I ended up doing it was easy enough...
