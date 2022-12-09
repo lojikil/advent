@@ -54,3 +54,10 @@ some point as well.
 
 Honestly, this should have been done with a visibility matrix: I should have computed the weights ahead of time so look ups
 would just check the neighbors' values, but the way I ended up doing it was easy enough...
+
+== Day Nine
+
+. part one: `dune exec bin/nine/nine.exe data/nine/actual | grep 'current' | awk '{print $6}' | sort | uniq | wc -l`
+.. basically move around as needed
+. part two: update a snaking list behind the head...
+
