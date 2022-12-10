@@ -56,55 +56,27 @@ let step = (direction:string, amt:int, cur_h:(int, int), cur_t:(int, int)):((int
     steps(amt, cur_h, cur_t);
 };
 let hotstepper = (direction:string, amt:int, h_cur:(int, int), tail:list((int, int))):((int, int), list((int, int))) => {
-    let one_step = (dir:string, c_h:(int, int)):(int, int) => {
-        let (c_h_x, c_h_y) = c_h;
-        switch(dir) {
-            | "R" => (c_h_x + 1, c_h_y)
-            | "L" => (c_h_x - 1, c_h_y)
-            | "U" => (c_h_x, c_h_y + 1)
-            | "D" => (c_h_x, c_h_y - 1)
-            | _ => c_h;
-        };
-    };
-    let rec update_deltas = (init_delta:(int, int), rope:list((int, int))):list((int, int)) => {
-        switch(rope) {
-            | [x] => {
-                let (d_x, d_y) = init_delta;
-                let (t_x, t_y) = x;
-                switch(init_delta) {
-                    | (2, _) => [(t_x + 1, t_y + d_y)];
-                    | (-2, _) => [(t_x - 1, t_y + d_y)];
-                    | (_, 2) => [(t_x + d_x, t_y + 1)];
-                    | (_, -2) => [(t_x + d_x, t_y - 1)];
-                    | (_, _) => [(t_x, t_y)];
-                };
+    let rec hotstepper = (head:(int, int), til:list((int, int))):list((int, int)) => {
+        print_endline("hotstepper: " ++ string_of_int(List.length(til)));
+        switch(til) {
+            | [] => []
+            | [x, ...xs] => {
+                let (new_h, new_t) = step(direction, 1, head, x);
+                List.cons(new_h, hotstepper(new_t, xs));
             }
-            | [x, y, ...xs] => {
-                let (d_x, d_y) = init_delta;
-                let (t_x, t_y) = x;
-                let new_x = switch(init_delta) {
-                    | (2, _) => (t_x + 1, t_y + d_y);
-                    | (-2, _) => (t_x - 1, t_y + d_y);
-                    | (_, 2) => (t_x + d_x, t_y + 1);
-                    | (_, -2) => (t_x + d_x, t_y - 1);
-                    | (_, _) => (t_x, t_y);
-                };
-                List.cons(new_x, update_deltas(delta(new_x, y), List.cons(y, xs)));
-            }
-            | _ => []
         }
     };
-    let rec hotsteps = (amt_rem:int, head:(int, int), tl:list((int, int))):((int, int), list((int, int))) => {
-        print_endline("tail tracker: " ++ string_of_pos(List.nth(tl, 8)));
-        if(amt_rem == 0) {
-            (head, tl)
-        } else {
-            let n_h = one_step(direction, head);
-            let (t_x, t_y) = List.nth(tl, 0);
-            let d = delta(n_h, (t_x, t_y));
-            hotsteps(amt_rem - 1, n_h, update_deltas(d, tail));
+    let rec hotsteps = (cur_amt, cur_h, cur_tail) => {
+        switch(cur_amt) {
+            | 0 => (cur_h, cur_tail)
+            | n => {
+                let newblock = hotstepper(cur_h, cur_tail);
+                print_endline("hotsteps len of tail: " ++ string_of_int(List.length(cur_tail)))
+                print_endline("hotsteps len of newblock: " ++ string_of_int(List.length(newblock)));
+                hotsteps(n - 1, List.hd(newblock), List.tl(newblock));
+            }
         }
-    };
+    }
     hotsteps(amt, h_cur, tail);
 };
 let tpos = ref((0, 0));
