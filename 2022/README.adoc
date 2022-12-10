@@ -61,3 +61,7 @@ would just check the neighbors' values, but the way I ended up doing it was easy
 .. basically move around as needed
 . part two: update a snaking list behind the head...
 
+== Day Ten
+
+. part one: instead of trying to time things, I just compiled into micro instructions that took 1 cycle each
+.. part two: literally just compare the states from part one to the screen value at that cycle and draw it
