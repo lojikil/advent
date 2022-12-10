@@ -56,24 +56,31 @@ let step = (direction:string, amt:int, cur_h:(int, int), cur_t:(int, int)):((int
     steps(amt, cur_h, cur_t);
 };
 let hotstepper = (direction:string, amt:int, h_cur:(int, int), tail:list((int, int))):((int, int), list((int, int))) => {
-    let rec hotstepper = (head:(int, int), til:list((int, int))):list((int, int)) => {
-        print_endline("hotstepper: " ++ string_of_int(List.length(til)));
-        switch(til) {
-            | [] => []
-            | [x, ...xs] => {
-                let (new_h, new_t) = step(direction, 1, head, x);
-                List.cons(new_h, hotstepper(new_t, xs));
+    let rec delta_steps = (accum:list((int, int)), t:(int, int), rope:list((int, int))) => {
+        switch(rope) {
+            | [] => List.rev(accum);
+            | [x, ... xs] => {
+                let (d_x, d_y) = delta(t, x);
+                let (t_x, t_y) = x;
+                switch((d_x, d_y)) {
+                    | (2, _) => delta_steps(List.cons(t, accum), (t_x + 1, t_y + d_y), xs);
+                    | (-2, _) => delta_steps(List.cons(t, accum), (t_x - 1, t_y + d_y), xs);
+                    | (_, 2) =>  delta_steps(List.cons(t, accum), (t_x + d_x, t_y + 1), xs);
+                    | (_, -2) => delta_steps(List.cons(t, accum), (t_x + d_x, t_y - 1), xs);
+                    | (_, _) => delta_steps(List.cons(t, accum), (t_x, t_y), xs);
+                }
             }
         }
-    };
+    }
     let rec hotsteps = (cur_amt, cur_h, cur_tail) => {
+        print_endline("hotsteps length: " ++ string_of_int(List.length(cur_tail)));
+        print_endline("hotsteps tailcheck: " ++ string_of_pos(List.nth(cur_tail, 8)));
         switch(cur_amt) {
             | 0 => (cur_h, cur_tail)
             | n => {
-                let newblock = hotstepper(cur_h, cur_tail);
-                print_endline("hotsteps len of tail: " ++ string_of_int(List.length(cur_tail)))
-                print_endline("hotsteps len of newblock: " ++ string_of_int(List.length(newblock)));
-                hotsteps(n - 1, List.hd(newblock), List.tl(newblock));
+                let (new_h, new_t) = step(direction, 1, cur_h, List.hd(cur_tail));
+                let offset_tail = delta_steps([], new_t, List.tl(cur_tail));
+                hotsteps(n - 1, new_h, List.cons(new_t, offset_tail));
             }
         }
     }
