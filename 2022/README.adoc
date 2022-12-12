@@ -59,9 +59,17 @@ would just check the neighbors' values, but the way I ended up doing it was easy
 
 . part one: `dune exec bin/nine/nine.exe data/nine/actual | grep 'current' | awk '{print $6}' | sort | uniq | wc -l`
 .. basically move around as needed
+.. got part one
 . part two: update a snaking list behind the head...
 
 == Day Ten
 
 . part one: instead of trying to time things, I just compiled into micro instructions that took 1 cycle each
 .. part two: literally just compare the states from part one to the screen value at that cycle and draw it
+
+== Day Eleven
+
+. part one: build out a monkey evaluator 
+.. got part one
+. part two: eh, not going to figure out why this is off...
+
