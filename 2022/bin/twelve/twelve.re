@@ -24,21 +24,23 @@ let string_of_pos = (p:(int, int)) => {
 };
 
 let climable_p = (cur:char, next:char):bool => {
-    let test = Char.compare(cur, next);
-    print_endline("Climbing? " ++ Char.escaped(cur) ++ "<=>" ++ Char.escaped(next) ++ ": " ++ string_of_int(test));
-    if (cur == 'S' && next == 'a') {
-        print_endline("still returning true for S<=>a");
-        true;
-    } else if(cur == 'a' && next == 'S') {
-        print_endline("still returning true for a<=>S");
-        true;
-    } else if (cur == 'z' && next == 'E') {
-        true;
-    } else if (cur == 'E' && next == 'z') {
-        true;
+    let clamp_cur = if(cur == 'S') { 
+        'a';
+    } else if(cur == 'E') {
+        'z';
     } else {
-        test >= -1 && test <= 1;
-    }
+        cur;
+    };
+    let clamp_next = if(next == 'E') {
+        'z'
+    } else if(next == 'S') {
+        'a'
+    } else {
+        next
+    };
+    let test = Char.compare(clamp_cur, clamp_next);
+    print_endline("Climbing? " ++ Char.escaped(cur) ++ "<=>" ++ Char.escaped(next) ++ ": " ++ string_of_int(test));
+    test >= -1 && test <= 1;
 }
 
 let make_map = (src:list(string)):array(array(char)) => {
@@ -58,6 +60,11 @@ let make_map = (src:list(string)):array(array(char)) => {
 
 let map_get = (m:array(array(char)), x, y) => {
     Array.get(Array.get(m, y), x); 
+}
+
+let map_get_pos = (m:array(array(char)), p:(int, int)) => {
+    let (x, y) = p;
+    Array.get(Array.get(m, y), x);
 }
 
 let print_list = (l:list(int)):unit => {
@@ -124,7 +131,7 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
                 let rt_range = map_get(m, l + 1, n);
                 let cur_range = map_get(m, l, n);
                 if(climable_p(cur_range, rt_range)) {
-                    print_endline("new_test right is actually climable");
+                    print_endline("new_test right is actually climable" ++ string_of_pos((l +1, n)));
                     Some((l + 1, n));
                 } else {
                     None
@@ -143,7 +150,7 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
             let rets = ref([[]]);
             List.iter((x) => {
                 print_list(List.flatten(rets^));
-                print_endline("in list iter");
+                print_endline("in list iter: " ++ string_of_pos(Option.value(x, ~default=(-1, -1))));
                 switch(x) {
                     | Some(p) => {
                         print_endline("  should be walking: " ++ string_of_pos(p));
@@ -151,7 +158,14 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
                             print_endline("    actually walking: " ++ string_of_pos(p));
                             Hashtbl.add(seen, p, true);
                             rets := List.cons(walk(curdistance + 1, p), rets^)
-                        } 
+                        } else if(p == epos) {
+                            print_endline("in 162 test?");
+                            let c = map_get_pos(m, curpos);
+                            let d = map_get_pos(m, p);
+                            if(climable_p(c, d)) {
+                                rets := List.cons([curdistance + 1], rets^);
+                            }
+                        }
                     }
                     | None => ();
                 }
