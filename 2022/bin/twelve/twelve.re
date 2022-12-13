@@ -39,7 +39,7 @@ let climable_p = (cur:char, next:char):bool => {
         next
     };
     let test = Char.compare(clamp_cur, clamp_next);
-    print_endline("Climbing? " ++ Char.escaped(cur) ++ "<=>" ++ Char.escaped(next) ++ ": " ++ string_of_int(test));
+    print_endline("Climbing? " ++ Char.escaped(clamp_cur) ++ "<=>" ++ Char.escaped(clamp_next) ++ ": " ++ string_of_int(test));
     test >= -1 && test <= 1;
 }
 
@@ -79,7 +79,7 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
         switch(curpos) {
             | (_, n) when (n - 1) < 0 => None;
             | (l, n) => {
-                print_endline("in new_pos test");
+                print_endline("in new_pos test up " ++ string_of_pos((l, n - 1)));
                 let up_range = map_get(m, l, n - 1);
                 let cur_range = map_get(m, l, n);
                 if(climable_p(cur_range, up_range)) {
@@ -99,7 +99,7 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
                 let dw_range = map_get(m, l, n + 1);
                 let cur_range = map_get(m, l, n);
                 if(climable_p(cur_range, dw_range)) {
-                    print_endline("new down is climable");
+                    print_endline("new down is climable" ++ string_of_pos((l, n + 1)));
                     Some((l, n + 1));
                 } else {
                     None
@@ -108,8 +108,9 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
         };
     };
     let left = (curpos):option((int, int))=> {
+        print_endline("in left: " ++ string_of_pos(curpos));
         switch(curpos) {
-            | (n, _) when (n - 1) < 0 => None;
+            | (z, _) when (z - 1) < 0 => None;
             | (l, n) => {
                 print_endline("in new_test left:" ++ string_of_pos(curpos) ++ "=>" ++ string_of_pos((l - 1, n)));
                 let lf_range = map_get(m, l - 1, n);
@@ -118,6 +119,7 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
                     print_endline("new_test left is climable");
                     Some((l - 1, n));
                 } else {
+                    print_endline("new test left climable returned false for: " ++ string_of_pos(curpos));
                     None
                 }
             }
@@ -131,7 +133,7 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
                 let rt_range = map_get(m, l + 1, n);
                 let cur_range = map_get(m, l, n);
                 if(climable_p(cur_range, rt_range)) {
-                    print_endline("new_test right is actually climable" ++ string_of_pos((l +1, n)));
+                    print_endline("new_test right is actually climable" ++ string_of_pos((l + 1, n)));
                     Some((l + 1, n));
                 } else {
                     None
@@ -139,42 +141,110 @@ let pathfinder = (m:array(array(char)), spos:(int, int), epos:(int, int)):list(i
             }
         };
     };
-    let seen = Hashtbl.create(~random=false, 10000);
-    Hashtbl.add(seen, spos, true);
-    let rec walk = (curdistance:int, curpos:(int, int)):list(int) => {
-        print_endline("walking: " ++ string_of_pos(curpos));
-        if(curpos == epos) {
-            [curdistance]
-        } else {
-            let paths = [up(curpos), down(curpos), left(curpos), right(curpos)];
-            let rets = ref([[]]);
-            List.iter((x) => {
-                print_list(List.flatten(rets^));
-                print_endline("in list iter: " ++ string_of_pos(Option.value(x, ~default=(-1, -1))));
-                switch(x) {
-                    | Some(p) => {
-                        print_endline("  should be walking: " ++ string_of_pos(p));
-                        if (!Hashtbl.mem(seen, p)) {
-                            print_endline("    actually walking: " ++ string_of_pos(p));
-                            Hashtbl.add(seen, p, true);
-                            rets := List.cons(walk(curdistance + 1, p), rets^)
-                        } else if(p == epos) {
-                            print_endline("in 162 test?");
-                            let c = map_get_pos(m, curpos);
-                            let d = map_get_pos(m, p);
-                            if(climable_p(c, d)) {
-                                rets := List.cons([curdistance + 1], rets^);
-                            }
-                        }
-                    }
-                    | None => ();
-                }
-            }, paths)
-            List.flatten(rets^)
-        }
+
+    switch(left((0, 1))) {
+        | Some(_) => print_endline("as a test: left of (0,1) is climable");
+        | None => print_endline("as a test: left of (0,1) is unclimable");
     }
-    walk(0, spos);
+    switch(left((1, 0))) {
+        | Some(_) => print_endline("as a test: left of (1,0) is climable");
+        | None => print_endline("as a test: left of (1,0) is unclimable");
+    }
+    let seen = Hashtbl.create(~random=false, 10000);
+    Hashtbl.add(seen, epos, true);
+    // man... so really I need to convert these into a walker & a
+    // consumer, but not tonight...
+    let rec walk = (curdistance:int, curpos:(int, int)) => {
+        //let lpaths = [up(curpos), down(curpos), left(curpos), right(curpos)];
+        let next_walks = ref([])
+        print_endline("curpos: " ++ string_of_pos(curpos));
+        if(curpos == spos) {
+            print_endline("super distance: " ++ string_of_int(curdistance));
+        }
+        switch(up(curpos)) {
+            | Some(p) => {
+                if(!Hashtbl.mem(seen, p)) {
+                    Hashtbl.add(seen, p, true);
+                    if(p == spos) {
+                        print_endline("super distance first if: " ++ string_of_int(curdistance + 1));
+                    }
+                    next_walks := List.cons(p, next_walks^);
+                } else if(p == spos) {
+                    print_endline("super distance if: " ++ string_of_int(curdistance + 1));
+                }
+            }
+            | None => ()
+        }
+
+        switch(down(curpos)) {
+            | Some(p) => {
+                if(!Hashtbl.mem(seen, p)) {
+                    Hashtbl.add(seen, p, true);
+                    if(p == spos) {
+                        print_endline("super distance first if: " ++ string_of_int(curdistance + 1));
+                    }
+                    next_walks := List.cons(p, next_walks^);
+                } else if(p == spos) {
+                    print_endline("super distance if: " ++ string_of_int(curdistance + 1));
+                }
+            }
+            | None => ()
+        }
+
+        switch(left(curpos)) {
+            | Some(p) => {
+                if(!Hashtbl.mem(seen, p)) {
+                    Hashtbl.add(seen, p, true);
+                    if(p == spos) {
+                        print_endline("super distance first if: " ++ string_of_int(curdistance + 1));
+                    }
+                    next_walks := List.cons(p, next_walks^);
+                } else if(p == spos) {
+                    print_endline("super distance if: " ++ string_of_int(curdistance + 1));
+                }
+            }
+            | None => ()
+        }
+
+        switch(right(curpos)) {
+            | Some(p) => {
+                if(!Hashtbl.mem(seen, p)) {
+                    Hashtbl.add(seen, p, true);
+                    if(p == spos) {
+                        print_endline("super distance first if: " ++ string_of_int(curdistance + 1));
+                    }
+                    next_walks := List.cons(p, next_walks^);
+                } else if(p == spos) {
+                    print_endline("super distance if: " ++ string_of_int(curdistance + 1));
+                }
+            }
+            | None => ()
+        }
+        List.iter((next_walk) => {
+            walk(curdistance + 1, next_walk);
+        }, next_walks^)
+        /*print_endline("distance: " ++ string_of_int(curdistance));
+        if(curpos == spos) {
+            print_endline("  super distance: " ++ string_of_int(curdistance));
+        }
+        print_endline("from " ++ string_of_pos(curpos) ++ " the following are walkable: ");
+        List.iter((x) => {
+            switch(x) {
+                | Some(p) => {
+                    print_endline("  " ++ string_of_pos(p));
+                    if(!Hashtbl.mem(seen, p)) {
+                        Hashtbl.add(seen, p, true);
+                        walk(curdistance + 1, p);
+                    }
+                }
+                | None => ();
+            }
+        }, lpaths);*/
+    }
+    walk(0, epos);
+    [0];
 }
+
 let print_map = (m:array(array(char))):unit => {
     Array.iter((r) => {
         print_endline(String.of_seq(Array.to_seq(r)));
