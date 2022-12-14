@@ -73,3 +73,6 @@ would just check the neighbors' values, but the way I ended up doing it was easy
 .. got part one
 . part two: eh, not going to figure out why this is off...
 
+== Day Twelve
+
+. I have found many ways to solve this same problem for the small set hahaha
