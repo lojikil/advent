@@ -1,4 +1,5 @@
 import sys
+import math
 
 class Map12:
     def __init__(self, map_data):
@@ -10,7 +11,7 @@ class Map12:
             row = self.map_data[idx]
             if "S" in row:
                 self.start_pos = (row.index("S"), idx)
-            elif "E" in row:
+            if "E" in row:
                 self.end_pos = (row.index("E"), idx)
 
     def __getitem__(self, key):
@@ -174,34 +175,66 @@ def getgscore(g, k):
 def lowest_score(scores, unvisited):
     minscore = INF
     cur = None
+    print("in lowest_score, unvisited has", len(unvisited))
     for u in unvisited:
-        if scores[u] < minscore:
+        if u in scores and scores[u] < minscore:
             cur = u
             minscore = scores[u]
+    #if cur is None and len(unvisited) > 0:
+    #    cur = unvisited.pop()
     return cur
 
-def dijkstra_walker(m):
+def distance(c, g):
+    (cx, cy) = c
+    (gx, gy) = g
+    dx = abs(gx - cx)
+    dy = abs(gy - cy)
+
+    if dx == 0:
+        return dy
+    elif dy == 0:
+        return dx
+    else:
+        return math.isqrt((dx * dx) + (dy * dy))
+
+def astar_walker(m):
+    cur = m.start()
+    goal = m.end()
+    print("tree neighbors cur: ", tree[cur]);
+    print("tree neighbors goal: ", tree[goal]);
     visited = set([])
-    unvisited = set([m.start()])
+    #unvisited = set(list(tree.keys()))
+    unvisited = set([cur])
     tvalues = {}
-    tvalues[m.start] = 0
+    tvalues[cur] = 0
     depth = 0
     fscore = {}
     gscore = {}
-    cur = m.start()
     gscore[cur] = 0
-    fscore[cur] = 1
+    fscore[cur] = distance(cur, goal);
     all_gscore = {}
     all_fscore = {}
     t_gscore = 0
     while len(unvisited) > 0:
+        cur = lowest_score(fscore, unvisited)
+        if cur in unvisited:
+            unvisited.remove(cur)
+
+        if cur is None:
+            print("exiting?", len(unvisited))
+            break
+
         print("cur: ", cur)
-        if cur == m.end():
+        if cur == goal:
             print("super hit end with depth: ", t_gscore, depth)
         neighbors = tree[cur]
+        print("neighbors: ", neighbors)
         for neighbor in neighbors:
-            t_gscore = gscore[cur] + 1
+            t_gscore = getgscore(gscore, cur) + 1
 
+            if neighbor == goal:
+                print("super neighbor check:", t_gscore)
+            print("sanity check:", t_gscore, getgscore(gscore, neighbor))
             if t_gscore < getgscore(gscore, neighbor):
                 if neighbor not in all_gscore:
                     all_gscore[neighbor] = [t_gscore]
@@ -209,22 +242,59 @@ def dijkstra_walker(m):
                     all_gscore[neighbor].append(t_gscore)
 
                 if neighbor not in all_fscore:
-                    all_fscore[neighbor] = [t_gscore + 400]
+                    all_fscore[neighbor] = [t_gscore + distance(neighbor, goal)]
                 else:
-                    all_fscore[neighbor].append(t_gscore + 400)
+                    all_fscore[neighbor].append(t_gscore + distance(neighbor, goal))
+
                 gscore[neighbor] = t_gscore
-                fscore[neighbor] = t_gscore + 400
+                fscore[neighbor] = t_gscore + distance(neighbor, goal)
+
                 if neighbor not in unvisited:
                     unvisited.add(neighbor)
 
-        unvisited.remove(cur)
-        cur = lowest_score(fscore, unvisited)
+    print("cur on exit was: ", cur)
     print("gscores:", gscore);
     print("fscores:", fscore);
-    print("lowest: ", gscore[m.end()])
-    print("end fscore", fscore[m.end()])
-    print("all gscores for end:", all_gscore[m.end()])
-    print("all fscores for end:", all_fscore[m.end()])
+    if goal in gscore:
+        print("lowest: ", gscore[goal])
+        print("end fscore", fscore[goal])
+        print("all gscores for end:", all_gscore[goal])
+        print("all fscores for end:", all_fscore[goal])
+
+def dijkstra_walker(m):
+    # very similar to our A* above, so not too hard to just 
+    # use the same machinery
+    cur = m.start()
+    end = m.end()
+    unvisited = set(list(tree.keys()))
+    visited = set([])
+    tentative_distance = {}
+    tentative_distance[cur] = 0
+    t_score = tentative_distance[cur]
+    while len(unvisited) > 0:
+        neighbors = tree[cur]
+        for neighbor in neighbors:
+            if neighbor in unvisited:
+                neighbor_score = getgscore(tentative_distance, neighbor)
+                if t_score + 1 < neighbor_score:
+                    tentative_distance[neighbor] = t_score + 1
+        unvisited.remove(cur)
+
+        if end in visited:
+            print("end in visited")
+            if end in tentative_distance:
+                print("end:", tentative_distance[end])
+            break
+
+        cur = lowest_score(tentative_distance, unvisited)
+        if cur is None:
+            print("breaking on none in dijkstra")
+            break
+        t_score = tentative_distance[cur]
+
+    print(tentative_distance)
+    if end in tentative_distance:
+        print("tentative end:", tentative_distance[end])
 
 def rise_run(s, e):
     (xs, ys) = s
@@ -248,6 +318,7 @@ def main():
     paths = forestwalkers(puzzle_map, 0, puzzle_map.end(), [])
     print("tree:", tree)
     print(paths)
+    astar_walker(puzzle_map)
     dijkstra_walker(puzzle_map)
     #for p in paths:
     #    print(p)
