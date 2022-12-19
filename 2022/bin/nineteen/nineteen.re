@@ -45,10 +45,34 @@ let buy_geobot_p = (resources:array(int), cost_ore:int, cost_obs:int) => {
     (amt_ore >= cost_ore) && (amt_obs >= cost_obs)
 };
 
+let half_geobot_p = (resources:array(int), bots:array(int), cost_obs:int) => {
+    let amt_obs = Array.get(resources, 2);
+    if (amt_obs >= ((cost_obs / 2) + 1)) {
+        true
+    } else if ((amt_obs + Array.get(bots, 2)) >= (cost_obs / 2)) {
+        // we will have enough next round
+        true
+    } else {
+        false
+    }
+};
+
 let buy_obsbot_p = (resources:array(int), cost_ore:int, cost_clay:int) => {
     let amt_ore = Array.get(resources, 0);
     let amt_clay = Array.get(resources, 1);
     (amt_ore >= cost_ore) && (amt_clay >= cost_clay)
+};
+
+let half_obsbot_p = (resources:array(int), bots:array(int), cost_clay:int) => {
+    let amt_clay = Array.get(resources, 1);
+    if (amt_clay >= ((cost_clay / 2) + 1)) {
+        true
+    } else if((amt_clay + Array.get(bots, 1)) >= (cost_clay / 2)) {
+        // will have enough next round
+        true
+    } else {
+        false
+    }
 };
 
 let buy_bot_p = (resources:array(int), cost_ore:int) => {
@@ -74,7 +98,7 @@ let rec simulate = (rnd:int, resources:array(int), bots:array(int), b:blueprint)
         Array.get(resources, 3);
     } else {
         // first we spend if we can then we do work 
-        print_endline("== Minute " ++ string_of_int(rnd) ++ " ==");
+        print_endline("== Minute " ++ string_of_int(25 - rnd) ++ " ==");
         print_endline("blueprint: " ++ string_of_int(b.bp_id));
         print_resources(resources);
         print_bots(bots);
@@ -86,7 +110,14 @@ let rec simulate = (rnd:int, resources:array(int), bots:array(int), b:blueprint)
         } else {
             Array.get(bots, 3);
         };
-        let new_obs = if(buy_obsbot_p(resources, b.obsbot_ore_cost, b.obsbot_clay_cost)) {
+        // it's this relationship here that's causing my failure; there's basically
+        // a check if we're close enough to a geo bot that we optimize for that,
+        // but this basic stack is correct up to 20 minutes...
+        let new_obs = if(half_geobot_p(resources, bots, b.geobot_obs_cost)) {
+            // if we are half way or greater to a geobot in one resource, delay
+            // this purchase
+            Array.get(bots, 2);
+        } else  if(buy_obsbot_p(resources, b.obsbot_ore_cost, b.obsbot_clay_cost)) {
             print_endline("\tbuying obsbot for " ++ string_of_int(b.obsbot_ore_cost) ++ " " ++ string_of_int(b.obsbot_clay_cost));
             Array.set(resources, 0, Array.get(resources, 0) - b.obsbot_ore_cost);
             Array.set(resources, 1, Array.get(resources, 1) - b.obsbot_clay_cost);
@@ -94,7 +125,9 @@ let rec simulate = (rnd:int, resources:array(int), bots:array(int), b:blueprint)
         } else {
             Array.get(bots, 2);
         };
-        let new_clay = if(buy_bot_p(resources, b.claybot_cost)) {
+        let new_clay = if(half_obsbot_p(resources, bots, b.obsbot_clay_cost)) {
+            Array.get(bots, 1); 
+        } else if(buy_bot_p(resources, b.claybot_cost)) {
             print_endline("\tbuying claybot for " ++ string_of_int(b.claybot_cost));
             Array.set(resources, 0, Array.get(resources, 0) - b.claybot_cost);
             Array.get(bots, 1) + 1; 
