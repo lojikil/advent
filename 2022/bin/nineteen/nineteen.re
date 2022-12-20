@@ -47,9 +47,9 @@ let buy_geobot_p = (resources:array(int), cost_ore:int, cost_obs:int) => {
 
 let half_geobot_p = (resources:array(int), bots:array(int), cost_obs:int) => {
     let amt_obs = Array.get(resources, 2);
-    if (amt_obs >= ((cost_obs / 2) + 1)) {
+    if (amt_obs >= (cost_obs / 2)) {
         true
-    } else if ((amt_obs + Array.get(bots, 2)) >= (cost_obs / 2)) {
+    } else if (Array.get(bots, 2) >= cost_obs) {
         // we will have enough next round
         true
     } else {
@@ -65,9 +65,9 @@ let buy_obsbot_p = (resources:array(int), cost_ore:int, cost_clay:int) => {
 
 let half_obsbot_p = (resources:array(int), bots:array(int), cost_clay:int) => {
     let amt_clay = Array.get(resources, 1);
-    if (amt_clay >= ((cost_clay / 2) + 1)) {
+    if (amt_clay >= (cost_clay / 2)) {
         true
-    } else if((amt_clay + Array.get(bots, 1)) >= (cost_clay / 2)) {
+    } else if(Array.get(bots, 1) >= cost_clay) {
         // will have enough next round
         true
     } else {
@@ -165,6 +165,6 @@ Stream.iter((x) => {
 }, iter_channel(fh));
 
 List.iter((b) => {
-    let res = simulate(25, [|0, 0, 0, 0|], [|1, 0, 0, 0|], b);
+    let res = simulate(24, [|0, 0, 0, 0|], [|1, 0, 0, 0|], b);
     print_endline("blueprint resulted in: " ++ string_of_int(res) ++ " with quality ID: " ++ string_of_int(res * b.bp_id));
 }, blueprints^);
