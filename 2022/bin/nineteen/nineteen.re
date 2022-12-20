@@ -47,9 +47,9 @@ let buy_geobot_p = (resources:array(int), cost_ore:int, cost_obs:int) => {
 
 let half_geobot_p = (resources:array(int), bots:array(int), cost_obs:int) => {
     let amt_obs = Array.get(resources, 2);
-    if (amt_obs >= (cost_obs / 2)) {
+    if (amt_obs >= ((cost_obs / 2) + 1)) {
         true
-    } else if (Array.get(bots, 2) >= cost_obs) {
+    } else if (Array.get(bots, 2) >= (cost_obs / 2)) {
         // we will have enough next round
         true
     } else {
@@ -65,9 +65,9 @@ let buy_obsbot_p = (resources:array(int), cost_ore:int, cost_clay:int) => {
 
 let half_obsbot_p = (resources:array(int), bots:array(int), cost_clay:int) => {
     let amt_clay = Array.get(resources, 1);
-    if (amt_clay >= (cost_clay / 2)) {
+    if (amt_clay >= ((cost_clay / 2) + 1)) {
         true
-    } else if(Array.get(bots, 1) >= cost_clay) {
+    } else if(Array.get(bots, 1) >= (cost_clay / 2)) {
         // will have enough next round
         true
     } else {
