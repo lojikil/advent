@@ -76,3 +76,24 @@ would just check the neighbors' values, but the way I ended up doing it was easy
 == Day Twelve
 
 . I have found many ways to solve this same problem for the small set hahaha
+
+== Day Nineteen
+
+. Ditto
+
+== Day Twenty-one
+
+. part one: evaluate it as normal
+. part two: generate a symbolic evaluation, and then pass that to Sage:
+
+```
+sage: a = var('a');
+sage: (((((23943872231817 - ((((866 + ((((2 * (((((2 * ((2 * (((166 + (2 * (((((((((2 * ((((2 * (((((((((922 + (948 + (855 + (2 * ((2
+....: 2 * (494 + (((((((((2 * (((747 + (222 + (25 + (34 * (((((470 + ((a - 866) * 21)) / 4) - 183) / 5) + 149))))) / 2) - 819)) - 111
+....: ) + 406) + 58) / 9) + 383) * 3) - 26) / 7))) - 146))))) / 3) + 935) / 6) - 816) * 6) - 727) / 5) + 740)) + 650) / 2) - 498)) -
+....: 227) / 3) + 877) * 7) - 141) + 915) / 2) + 367))) / 2) - 966)) + 654)) - 193) + 150) / 7) - 640)) + 971) + 273) / 2)) / 3) - 63
+....: 0) * 2)) * 8) + 457) / 3) == 21766407157323)
+-23936/2025*a + 129296910059328323/2025 == 21766407157323
+sage: solve(-23936/2025*a + 129296910059328323/2025 == 21766407157323, a)
+[a == 3560324848168]
+```

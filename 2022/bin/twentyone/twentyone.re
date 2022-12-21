@@ -234,7 +234,6 @@ let concretize = (v:value):int => {
             | (_, _) => (r, l);
         }
     }
-    /*
     let rec cement = (v:value, start:int) => {
         switch(v) {
             | Symbol => start;
@@ -259,13 +258,40 @@ let concretize = (v:value):int => {
                 // ----
                 //
                 // oh actually maybe not?
-
-                switch
+                print_endline("cement mixing:\n\t" ++ string_of_int(start));
+                print_endline("\t"++ string_of_value(r) ++ " " ++ op ++ " " ++ string_of_value(l));
+                let (newr, newl) = unmix(r, l);
+                switch(op) {
+                    | "+" => {
+                        switch(newr) {
+                            | Concrete(ir) => cement(newl, start - ir);
+                            | _ => start;
+                        }
+                    }
+                    | "-" =>  {
+                        switch(newr) {
+                            | Concrete(ir) => cement(newl, start + ir);
+                            | _ => start;
+                        }
+                    }
+                    | "/" => {
+                        switch(newr) {
+                            | Concrete(ir) => cement(newl, start * ir);
+                            | _ => start;
+                        }
+                    }
+                    | "*" => {
+                        switch(newr) {
+                            | Concrete(ir) => cement(newl, start / ir);
+                            | _ => start;
+                        }
+                    }
+                    | _ => 10
+                }
             }
             | Concrete(c) => c;
         }
     };
-    */
     let (r, op, l) = switch(v) {
         | Symbolic(rr, oo, ll) => (rr, oo, ll);
         | Concrete(rr) => (Concrete(rr), "", zulu);
@@ -277,10 +303,10 @@ let concretize = (v:value):int => {
             switch((r, l)) {
                 | (Concrete(ir), _) => {
                     // call cement
-                    ir;
+                    cement(l, ir);
                 }
                 | (_, Concrete(il)) => {
-                    il
+                    cement(r, il);
                 }
                 | (_, _) => {
                     10;
