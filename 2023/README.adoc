@@ -1,0 +1,12 @@
+= 2023
+
+I started in C this year, mostly because I actually did this on my work laptop and was too lazy to setup Reason again..
+
+== Day One:
+
+- part 1: test values in an array for digits, sum them
+-- this actually started out way more complex, but then I simplified the logic and it was straight forward.
+- part 2: brute force scanning for number words over the set
+-- if we have a digit, stop
+-- if we have a word, stop
+-- else move to the next position
