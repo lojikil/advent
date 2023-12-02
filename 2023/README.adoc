@@ -10,3 +10,10 @@ I started in C this year, mostly because I actually did this on my work laptop a
 -- if we have a digit, stop
 -- if we have a word, stop
 -- else move to the next position
+
+== Day Two:
+
+I ended up being too lazy to manage strings in C and just went with python
+
+- part 1: split strings, constrain
+- part 2: append a list, run `reduce(max, color_list, 0)` for each color, multiply and add to the `power`
