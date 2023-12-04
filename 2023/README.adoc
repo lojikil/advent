@@ -18,8 +18,19 @@ I ended up being too lazy to manage strings in C and just went with python
 - part 1: split strings, constrain
 - part 2: append a list, run `reduce(max, color_list, 0)` for each color, multiply and add to the `power`
 
-= Day Three:
+== Day Three:
 
 - part 1: every year I tell myself that next year I will have an adjacency matrix figured out before advent of code, but not this year...
 -- make an adjacency matrix, and fill it int
 - part 2: note whenever we see a gear, and then group all the gears together. if we have 2 part numbers by a gear, multiply them, and sum all of those
+
+== Day Four:
+
+- part 1: count the cards, intersect the sets, and count the wins
+- part 2: just add those wins to a work queue and re run them, it should be fine...
+-- it was not fine
+- part 3 (aka actual part 2 fix): there's a relationship between cards' scores, use that
+-- `for idx in range(0, wins):`
+--- `data[idx + cardno + 1] += data[cardno]`
+-- the answer is `sum(list(data.values()))`
+
