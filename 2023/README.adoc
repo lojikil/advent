@@ -41,3 +41,10 @@ I ended up being too lazy to manage strings in C and just went with python
 - part 3: cry
 - part 4: write a specializer that takes parts of the Python and generates C
 -- actually solve the problem, but still by brute force 
+
+== Day Six:
+
+- part 1: parse out, dual loops, done
+- part 2: glom the original races together, run the same code
+
+This was a very small stretch, so I wonder if tomorrow will be BRUTAL in comparison
