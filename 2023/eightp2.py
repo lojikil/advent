@@ -1,6 +1,7 @@
 import sys
 import collections
 import functools
+import math
 
 if len(sys.argv) != 2:
     print("usage: {0} [file]".format(sys.argv[0]))
@@ -24,6 +25,8 @@ with open(sys.argv[1]) as fh:
     nodep = 0
     count = 0
     p_nodes = starting_nodes.copy()
+    counts = []
+    print("starting nodes:", starting_nodes)
     while True:
         n_nodes = []
         cnt_z = 0
@@ -35,13 +38,20 @@ with open(sys.argv[1]) as fh:
                 node = tree[0]
             else:
                 node = tree[1]
-            n_nodes.append(node)
+            print("node:", node, "z?", node.endswith("Z"))
             if node.endswith("Z"):
+                counts.append(count + 1)
                 cnt_z += 1
+                print(cnt_z, len(starting_nodes))
+            else:
+                n_nodes.append(node)
+
         p_nodes = n_nodes
         print(count, n_nodes)
         count += 1
         nodep += 1
-        if cnt_z == len(starting_nodes):
+        if cnt_z == len(starting_nodes) or len(p_nodes) == 0:
             break
     print(count)
+    print(counts)
+    print(math.lcm(*counts))
