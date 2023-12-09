@@ -58,3 +58,10 @@ This was a very small stretch, so I wonder if tomorrow will be BRUTAL in compari
 
 - part 1: follow the nodes
 - part 2: follow the nodes, but then stop at the cycle, allowing remainders to run, and take the LCM of all steps
+
+== Day Nine:
+
+I accidentally deleted my code, *thankfully* I did that after I submitted both parts
+
+- part 1: recursive function to build the ∆ between arrays, return that triangle, and `reduce(lambda x, y: x + y[-1], triangles, 0)`
+- part 2: same, but then `reduce(lambda x, y: y[0] - x, triangles, 0)`
