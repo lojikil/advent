@@ -53,3 +53,8 @@ This was a very small stretch, so I wonder if tomorrow will be BRUTAL in compari
 
 - part 1: ugh, I have to read all the rules carefully before playing
 - part 2: ugh, I shouldn't try to write decision mapping code at 0200...
+
+== Day Eight
+
+- part 1: follow the nodes
+- part 2: follow the nodes, but then stop at the cycle, allowing remainders to run, and take the LCM of all steps
