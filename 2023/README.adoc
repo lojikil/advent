@@ -65,3 +65,8 @@ I accidentally deleted my code, *thankfully* I did that after I submitted both p
 
 - part 1: recursive function to build the ∆ between arrays, return that triangle, and `reduce(lambda x, y: x + y[-1], triangles, 0)`
 - part 2: same, but then `reduce(lambda x, y: y[0] - x, triangles, 0)`
+
+== Day Ten:
+
+- part 1: depth first search with work queue
+- part 2: haven't finished yet, but working on flood fill version
