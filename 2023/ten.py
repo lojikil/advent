@@ -150,10 +150,10 @@ def find_nest(dmap, tree, pos):
     potential_nest = []
     nest_tree = {}
     for node in workq:
-        potentials = [north(dmap, node),
-                      south(dmap, node),
-                      east(dmap, node),
-                      west(dmap, node)]
+        potentials = [north(node),
+                      south(node),
+                      east(node),
+                      west(node)]
         for p in potentials:
             clamped_p = clamped_access(dmap, p)
             if clamped_p is not None and clamped_p == '.':
@@ -161,10 +161,10 @@ def find_nest(dmap, tree, pos):
     candidate_nest = []
     for p in potential_nest:
         interior_p = False
-        potentials = [north(dmap, p),
-                      south(dmap, p),
-                      east(dmap, p),
-                      west(dmap, p)]
+        potentials = [clamped_access(dmap, north(p)),
+                      clamped_access(dmap, south(p)),
+                      clamped_access(dmap, east(p)),
+                      west(p)]
         for none_hunt in potentials:
             if none_hunt is not None:
                 interior_p = True
@@ -173,7 +173,9 @@ def find_nest(dmap, tree, pos):
         if interior_p:
             candidate_nest.append(p)
 
-    new_map = explode_map(dmap, pos)
+    # new_map = explode_map(dmap, pos)
+
+    print("candidates:", candidates)
 
     for candidate in candidate_nest:
         # ok, so:
@@ -198,3 +200,4 @@ startcon = analyze_pipe(data, spos)
 print("start:", startcon)
 tree, depths = dfs(data, spos)
 print("depths:", depths, depths / 2)
+find_nest(data, tree, spos)
