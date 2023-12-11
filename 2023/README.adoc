@@ -70,3 +70,8 @@ I accidentally deleted my code, *thankfully* I did that after I submitted both p
 
 - part 1: depth first search with work queue
 - part 2: haven't finished yet, but working on flood fill version
+
+== Day Eleven:
+
+- part 1: expand universe, count paths
+- part 2: (not done yet) but need to figure out some simpler distance formula between the points 
