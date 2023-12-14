@@ -75,3 +75,16 @@ I accidentally deleted my code, *thankfully* I did that after I submitted both p
 
 - part 1: expand universe, count paths
 - part 2: (not done yet) but need to figure out some simpler distance formula between the points 
+
+== Day 12:
+
+Didn't complete yet, work was busy
+
+== Day 13:
+
+Didn't complete yet, work was busy
+
+== Day 14:
+
+- part 1: roll rocks
+- part 2: (not completed yet) 
