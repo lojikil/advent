@@ -88,3 +88,8 @@ Didn't complete yet, work was busy
 
 - part 1: roll rocks
 - part 2: (not completed yet) 
+
+== Day 15:
+
+- part 1: hash
+- part 2: ordered dicts of lenses of boxes
