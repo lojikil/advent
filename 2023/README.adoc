@@ -100,3 +100,21 @@ Didn't complete yet, work was busy
 -- only add items to the queue if we've seen the position less than 100 times (I tried with 1000 and 100000 first, 100 didn't change the outcome, so I ran with it)
 - part 2: add an optional parameter to part 1, which is the starting beam. Run all possible starting beams
 -- this probably could have been memoized for positions that have similar paths, but also meh
+
+== Day 17:
+
+Not done yet
+
+== Day 18:
+
+Not done yet
+
+== Day 19:
+
+- part 1: compile the language
+- part 2: explore the paths
+
+== Day 20:
+
+- part 1: build a bunch of classes for handling signal pulses
+- part 2: ... and now we wait

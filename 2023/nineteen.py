@@ -44,11 +44,6 @@ class Symbolic:
 # we really need a constraint class
 @dataclass
 class SymValue(Symbolic):
-    x:str
-    m:str
-    a:str
-    s:str
-    trace:str
     val:str
 
 @dataclass
@@ -56,8 +51,6 @@ class SymPath(Symbolic):
     trace:typing.Any
     cnd:typing.Any
     val:int
-    valleft:SymValue
-    valright:SymValue
 
 def dict_of_part(rawp):
     ret = {}
@@ -143,49 +136,55 @@ def part1(rules, parts):
         total += a["s"]
     return total
 
-def part2(workflows):
+def part2(rules):
     accepted = []
     currule = "in"
-    workq = [(SymVal(0), 0, "in", [])]
+    workq = [(SymValue(0), 0, "in", [], None)]
     currule = "in"
     pc = 0
     p = rules[currule]
     curpath = []
-    print("debugging: curpart = ", part)
+    currel = None
     while len(workq) > 0:
-        cv, pc, currule, curpath = workq[0]
+        cv, pc, currule, curpath, currel = workq[0]
         workq = workq[1:]
         p = rules[currule]
         inst = p[pc]
-        print("debugging: ", inst, pc, tv)
+        if len(curpath) > 1:
+            lastcnd = curpath[-2].cnd
+        else:
+            lastcnd = ""
         if type(inst) == LtOp:
-            print(inst.op0, "(", part[inst.op0], ") <", inst.op1, ":", part[inst.op0] < inst.op1)
-            curpath.append(SymPath(curpath, "{0} < {1}".format(inst.op0, inst.op1)))
-            tv = part[inst.op0] < inst.op1
+            currel = (inst.op0, "LT", inst.op1)
+            curpath.append(SymPath(curpath, lastcnd + "&& ({0} < {1})".format(inst.op0, inst.op1), pc))
+            workq.append((cv, pc + 1, currule, curpath, currel))
         elif type(inst) == GtOp:
-            print(inst.op0, "(", part[inst.op0], ") >", inst.op1, ":", part[inst.op0] > inst.op1)
-            tv = part[inst.op0] > inst.op1
+            currel = (inst.op0, "GT", inst.op1)
+            curpath.append(SymPath(curpath, lastcnd + "&& ({0} > {1})".format(inst.op0, inst.op1), pc))
+            workq.append((cv, pc + 1, currule, curpath, currel))
         elif type(inst) == JumpNT:
-            if not tv:
-                pc += 1
-            tv = False
+            workq.append((cv, pc + 1, currule, curpath, currel))
+            newpath = curpath[:-1]
+            if currel[1] == "LT":
+                newpath.append(SymPath(newpath, lastcnd + " && ({0} >= {1})".format(currel[0], currel[2]), pc))
+            else:
+                newpath.append(SymPath(newpath, lastcnd + " && ({0} <= {1})".format(currel[0], currel[2]), pc))
+            workq.append((cv, pc + 2, currule, newpath, currel))
         elif type(inst) == Accept:
-            accepted.append(part)
-            ar = True
+            accepted.append(curpath)
+            #print("this path was accepted:", curpath[-1])
+            p = curpath[-1]
+            #print("trace:", p.trace)
+            print("accepted condition:", p.cnd)
+            continue
         elif type(inst) == Reject:
-            ar = True
+            continue
         elif type(inst) == Call:
-            currule = inst.callee
-            p = rules[currule]
-            pc = -1
-            print("debug calling:", currule, p)
-        pc += 1
+            print("debug calling:", inst.callee)
+            workq.append((cv, 0, inst.callee, curpath, currel))
     total = 0
-    for a in accepted:
-        total += a["x"]
-        total += a["m"]
-        total += a["a"]
-        total += a["s"]
+    #print("Accepted paths:", accepted)
+    print("Accepted paths:", len(accepted))
     return total
 
 with open(sys.argv[1]) as fh:
@@ -206,3 +205,5 @@ with open(sys.argv[1]) as fh:
     print_program(workflows)
     print("parts:", data)
     print(part1(workflows, data))
+    print("--------\npart 2")
+    print(part2(workflows))
